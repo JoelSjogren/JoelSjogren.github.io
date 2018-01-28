@@ -1,0 +1,309 @@
+<html>
+<head>
+<style>
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+
+html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+
+maincanvas { display:block; } /* To remove the scrollbars */
+</style>
+<script  id = "shader-vs" type = "x-shader/x-vertex">
+precision highp float;
+attribute vec2 a_Position;
+void main() {
+  gl_Position = vec4(a_Position.x, a_Position.y, 0.0, 1.0);
+}
+</script>
+
+
+
+
+
+
+
+
+
+<script id = "shader-fs" type = "x-shader/x-fragment">
+precision highp float;
+
+uniform vec2 u_zoomCenter;
+uniform float u_zoomSize;
+uniform int u_maxIterations;
+
+const int N = 10;
+uniform vec2 p[2*N];  // monic polynomial p = z^deg_p + sum p[i]z^(deg_p-1-i)
+uniform int deg_p;  // deg_p <= N
+uniform vec2 roots[2*N];  // roots of p
+
+int close(vec2 z) {
+  for (int i = 0; i <= N; i++) {
+    if (i == deg_p) return -1;
+    if (distance(z, roots[i]) < 1.0) return i;
+  }
+}
+
+vec2 cmul(vec2 a, vec2 b) {
+  return mat2(a,-a.y,a.x)*b;
+}
+
+vec2 cinv(vec2 a) {
+  return vec2(a.x,-a.y) / (a.x*a.x + a.y*a.y);
+}
+
+vec2 newton(vec2 z) {
+  vec2 pval = vec2(1, 0);
+  for (int i = 0; i < N; i++) {
+    if (i == deg_p) break;
+    pval = cmul(pval, z) + p[i];
+  }
+  vec2 dpval = vec2(float (deg_p), 0);
+  for (int i = 0; i < N; i++) {
+    if (i+1 == deg_p) break;
+    dpval = cmul(dpval, z) + float (deg_p-i-1)*p[i];
+  }
+  return z - cmul(pval, cinv(dpval));
+}
+
+vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
+    return a + b*cos( 6.28318*(c*t+d) );
+}
+
+void main() {
+  if (deg_p == 0) {
+    gl_FragColor = vec4(0,0,0,1);
+    return;
+  }
+  
+  vec2 z = gl_FragCoord.xy;  // initial guess
+  int iterations = 0;
+  int kind = -1;
+  for (int i = 0; i < 1000; i++) {
+    if ((kind = close(z)) != -1) break;
+    z = newton(z);
+    iterations++;
+  }
+  vec3 base = vec3(0.0,0.0,0.0);
+  if (kind == 0) base = vec3(1.0,0.0,0.0);
+  if (kind == 1) base = vec3(0.0,1.0,0.0);
+  if (kind == 2) base = vec3(0.0,0.0,1.0);
+  if (kind == 3) base = vec3(1.0,1.0,0.0);
+  if (kind == 4) base = vec3(1.0,0.0,1.0);
+  if (kind == 5) base = vec3(0.0,1.0,1.0);
+  
+  gl_FragColor = vec4(base * pow(float(iterations) / 100.0, 0.1), 1.0);
+}
+
+/*
+  vec2 uv = gl_FragCoord.xy / vec2(800.0, 800.0);
+  vec2 c = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
+  vec2 x = vec2(0.0);
+  bool escaped = false;
+  int iterations = 0;*/
+
+</script>
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+var gl = null;
+var p;
+var deg_p;
+var roots;
+var roots_uniform;
+
+
+
+
+var cmul = function(a, b) {
+  return [a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]];
+}
+
+var polymul = function(a, b) {
+  if (a.length == 0 || b.length == 0) return [];
+    var ab = Array(a.length + b.length - 1);
+    for (var i = 0; i < ab.length; i++) {
+      ab[i] = [0, 0];
+    }
+    for (var i = 0; i < a.length; i++) {
+      for (var j = 0; j < b.length; j++) {
+        ab[i+j][0] += a[i][0]*b[j][0] - a[i][1]*b[j][1];
+        ab[i+j][1] += a[i][0]*b[j][1] + a[i][1]*b[j][0];
+      }
+    }
+  return ab;
+}
+
+var q = function(roots) {
+  ret = [[1, 0]];
+  for (var i = 0; i < roots.length; i++) {
+    ret = polymul(ret, [[1, 0], [-roots[i][0], -roots[i][1]]]);
+  }
+  ret.splice(0, 1);  // hide implicit monic term
+  ret = [].concat.apply([], ret);  // flatten
+  return ret;
+}
+
+
+
+function main() {
+  /* locate the canvas element */
+  var canvas_element = document.getElementById("maincanvas");
+
+  /* fullscreen */
+  canvas_element.width = window.innerWidth;
+  canvas_element.height = window.innerHeight;
+  
+  /* obtain a webgl rendering context */
+  gl = canvas_element.getContext("webgl");
+
+  /* get shader code from the <script> tags */
+  var vertex_shader_src = document.getElementById("shader-vs").text;
+  var fragment_shader_src = document.getElementById("shader-fs").text;
+
+  /* compile and link shaders */
+  var vertex_shader = gl.createShader(gl.VERTEX_SHADER);
+  var fragment_shader = gl.createShader(gl.FRAGMENT_SHADER);
+  gl.shaderSource(vertex_shader, vertex_shader_src);
+  gl.shaderSource(fragment_shader, fragment_shader_src);
+  gl.compileShader(vertex_shader);
+  console.log(gl.getShaderInfoLog(vertex_shader));  
+  gl.compileShader(fragment_shader);
+  console.log(gl.getShaderInfoLog(fragment_shader));  
+  var mandelbrot_program = gl.createProgram();
+  gl.attachShader(mandelbrot_program, vertex_shader);
+  gl.attachShader(mandelbrot_program, fragment_shader);
+  gl.linkProgram(mandelbrot_program);
+  gl.useProgram(mandelbrot_program);
+
+  /* create a vertex buffer for a full-screen triangle */
+  var vertex_buf = gl.createBuffer(gl.ARRAY_BUFFER);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  
+  /* set up the position attribute */
+  var position_attrib_location = gl.getAttribLocation(mandelbrot_program, "a_Position");
+  gl.enableVertexAttribArray(position_attrib_location);
+  gl.vertexAttribPointer(position_attrib_location, 2, gl.FLOAT, false, 0, 0);
+
+  /* find uniform locations */
+  var zoom_center_uniform = gl.getUniformLocation(mandelbrot_program, "u_zoomCenter");
+  var zoom_size_uniform = gl.getUniformLocation(mandelbrot_program, "u_zoomSize");
+  var max_iterations_uniform = gl.getUniformLocation(mandelbrot_program, "u_maxIterations");
+  
+  var p_uniform = gl.getUniformLocation(mandelbrot_program, "p");
+  var deg_p_uniform = gl.getUniformLocation(mandelbrot_program, "deg_p");
+  roots_uniform = gl.getUniformLocation(mandelbrot_program, "roots");
+  
+  /* these hold the state of zoom operation */
+  var zoom_center = [0.0, 0.0];
+  var target_zoom_center = [0.0, 0.0];
+  var zoom_size = 4.0;
+  var stop_zooming = true;
+  var zoom_factor = 1.0;
+  var max_iterations = 500;
+
+  /* this holds the roots */
+  roots = [];
+  p = [[1, 0]];
+    
+  var renderFrame = function () {
+    
+    /* bind inputs & render frame */
+    gl.uniform2f(zoom_center_uniform, zoom_center[0], zoom_center[1]);
+    gl.uniform1f(zoom_size_uniform, zoom_size);
+    gl.uniform1i(max_iterations_uniform, max_iterations);
+
+    console.log('roots', roots, 'p', p, 'deg_p', roots.length/2|0);
+    gl.uniform2fv(p_uniform, p);
+    gl.uniform1i(deg_p_uniform, roots.length/2|0);
+    gl.uniform2fv(roots_uniform, roots);
+    
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    
+    /* handle zoom */
+    if (!stop_zooming) { /* zooming in progress */
+      /* gradually decrease number of iterations, reducing detail, to speed up rendering */
+      max_iterations -= 10;
+      if (max_iterations < 50) max_iterations = 50;
+      
+      /* zoom in */
+      zoom_size *= zoom_factor;
+      
+      /* move zoom center towards target */
+      zoom_center[0] += 0.1 * (target_zoom_center[0] - zoom_center[0]);
+      zoom_center[1] += 0.1 * ( target_zoom_center[1] - zoom_center[1]);
+
+      window.requestAnimationFrame(renderFrame);
+    } else if (max_iterations < 500) {
+        /* once zoom operation is complete, bounce back to normal detail level */
+        max_iterations += 10;
+        window.requestAnimationFrame(renderFrame);
+    }
+  }
+   
+  /* input handling */
+  canvas_element.onmousedown = function(e) {
+    var x_part = e.offsetX / canvas_element.width;
+    var y_part = e.offsetY / canvas_element.height;
+    target_zoom_center[0] = zoom_center[0] - zoom_size / 2.0 + x_part * zoom_size;
+    target_zoom_center[1] = zoom_center[1] + zoom_size / 2.0 - y_part * zoom_size;
+    stop_zooming = false;
+    zoom_factor = e.buttons & 1 ? 0.99 : 1.01;
+    renderFrame();
+    return true;
+  }
+  canvas_element.oncontextmenu = function(e){return false;}
+  canvas_element.onmouseup = function(e) { stop_zooming = true; }
+
+  var touchHandler = function(e) {
+    roots = [];
+    for (var i = 0; i < e.touches.length; i++) {
+      t = e.touches[i];
+      roots.push([t.clientX, window.innerHeight-t.clientY]);
+    }
+    p = q(roots);
+    roots = [].concat.apply([], roots);  // flatten
+    e.preventDefault();
+    renderFrame();
+    //console.log(roots);
+  }
+
+  canvas_element.addEventListener('touchstart', touchHandler, false );
+  canvas_element.addEventListener('touchmove',  touchHandler, false );
+  canvas_element.addEventListener('touchend',  touchHandler, false );
+  canvas_element.addEventListener('touchcancel',  touchHandler, false );
+
+  window.addEventListener('resize', function() {
+    /* fullscreen */
+    canvas_element.width = window.innerWidth;
+    canvas_element.height = window.innerHeight;
+  }, false);
+  
+  /* display initial frame */
+  renderFrame(); 
+}
+</script>
+
+
+
+
+
+
+
+
+
+</head>
+<body onload="main()">
+<center>
+<canvas id="maincanvas">canvas not supported</canvas>
+</center>
+</body>
+</html>
