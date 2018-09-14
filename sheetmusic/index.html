@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+
+var br = function() { return document.createElement("br"); }
+
+window.onload = function() {
+
+  links = document.getElementById("links");
+
+  loadLinks(['/audio/headers/musicheaders1.asm',
+             '/audio/headers/musicheaders2.asm',
+             '/audio/headers/musicheaders3.asm']);
+	     
+}
+
+loadLinks = function(xs) {
+  if (xs.length == 0) return;
+  
+  var client = new XMLHttpRequest();
+  client.open('GET', xs[0]);
+  client.onloadend = function() {
+    addAllLinks(parseMeta(client.responseText));
+    links.append(br());
+    loadLinks(xs.slice(1));
+  }
+  client.send();
+}
+
+parseMeta = function(asm) {
+  var regex1 = RegExp('Music_[a-zA-Z]*::\n\taudio Music_([a-zA-Z]*)((?:, Ch[0-9])*)', 'g');
+  var out = [];
+  var x;
+  while ((x = regex1.exec(asm)) !== null) {
+    entry = {'name': x[1], 'channels': x[2].split(', ').slice(1)};
+    out.push(entry);
+  }
+  return out;
+}
+
+addAllLinks = function(xs) {
+  for (var i = 0; i < xs.length; i++) {
+    addLink(xs[i]);
+  }
+}
+
+addLink = function(x) {
+  var link = document.createElement("a");
+  link.href = `show.html?name=${x['name']}&channels=${x['channels']}`
+  link.text = x['name'];
+  links.append(link);
+  links.append(br());
+}
+
+</script>
+</head>
+
+<body>
+
+<table cellspacing="0" cellpadding="0" class="fixed">
+  <tr>
+    <td>
+      <img src="redcover.jpg" width="400px"/>
+      <br>
+      <img src="bluecover.jpg" width="400px"/>
+    </td>
+    <td id="links">
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+ 

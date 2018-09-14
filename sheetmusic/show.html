@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+
+var sscale = "10px";
+var tscale = "15px"; var double_tscale = "30px";
+var tmax = 100;
+var smin = 0;
+var smax = 100;
+
+var name;
+var channels;
+
+var chromatic = ['C_', 'C#', 'D_', 'D#', 'E_', 'F_', 'F#', 'G_', 'G#', 'A_', 'A#', 'B_'];
+
+window.onload = function() {
+
+  var regex1 = /\?name=([a-zA-Z]*)&channels=([a-zA-Z,0-9]*)/;
+  var tmp = regex1.exec(window.location.href);
+  name = tmp[1];
+  channels = tmp[2].split(',');
+
+  setHeader();
+  makePiano();
+  loadAsmMusicFile();
+
+}
+
+setHeader = function() {
+  header = document.getElementById("header");
+  header.innerText = "Pokemon RBY - " + name;
+}
+
+makePiano = function() {
+  piano = document.getElementById("piano");
+  piano.border = 1;
+  sheet = document.getElementById("sheet");
+  sheet.border = 1;
+  
+  var row = document.createElement("tr");
+  piano.appendChild(row);
+  for (var s = smin; s < smax; s++) {
+          var cell = document.createElement("td");
+	  var blackKey = [1,3,6,8,10].indexOf(s % 12) != -1;
+	  cell.bgColor = blackKey ? "#000000" : "#FFFFFF";
+	  cell.width = sscale;
+	  cell.height = double_tscale;
+          cell.appendChild(document.createTextNode(""));
+          row.appendChild(cell);
+  };
+
+  for (var t = 0; t < tmax; t++) {
+      var row = document.createElement("tr");
+      sheet.appendChild(row);
+      
+      for (var s = smin; s < smax; s++) {
+          var cell = document.createElement("td");
+	  var blackKey = [1,3,6,8,10].indexOf(s % 12) != -1;
+	  cell.bgColor = blackKey ? "#F7F7F7" : "#FFFFFF";
+	  cell.width = sscale;
+	  cell.height = tscale;
+          cell.appendChild(document.createTextNode(""));
+          row.appendChild(cell);
+      };
+  };
+}
+
+loadAsmMusicFile = function() {
+  var path = 'audio/music/' + name.toLowerCase() + '.asm';
+
+  var client = new XMLHttpRequest();
+  client.open('GET', path);
+  client.onloadend = function() {
+    file = client.responseText;
+    renderAsmMusicFile(file);
+  }
+  client.send();
+}
+
+renderAsmMusicFile = function(text) {
+  for (var i = 0; i < channels.length; i++) {
+    renderAsmMusicChannel(text, i);
+  }
+}
+
+renderAsmMusicChannel = function(text, i) {
+  lines = text.split('\n');
+  var state = 'looking';
+  var goal = 'Music_' + name + '_' + channels[i];
+  var octave;
+  var t = 0;
+  for (var j = 0; j < lines.length; j++) {
+    if (t + 16 >= tmax) return;
+    if (state == 'looking' && lines[j].startsWith(goal)) {
+      state = 'copying';
+    } else if (state == 'copying') {
+      if (lines[j].startsWith('\toctave')) {
+        octave = Number(lines[j][1+'octave'.length+1]);
+      }
+      var k = chromatic.indexOf(lines[j].slice(1, 3));
+      if (k != -1) {
+        var dt = Number(lines[j].split(' ')[1]);
+	renderNote(12*octave + k, t, dt, channels[i]);
+	t += dt;
+      }
+      if (lines[j].startsWith('\trest')) {
+        var dt = Number(lines[j].split(' ')[1]);
+        t += dt;
+      }
+    } else if (state == 'copying' && lines[j].startsWith('\tloopchannel')) {
+      return;
+    }
+  }
+}
+
+renderNote = function(key, t, dt, chan) {
+  channelColors = {'Ch0': 'red', 'Ch1': 'green', 'Ch2': 'blue'};
+  for (var i = 0; i < dt; i++) {
+    sheet.rows[t+i].cells[key-smin].bgColor =
+      i == 0 ? channelColors[chan] : '#BBBBBB';
+  }
+  
+}
+
+
+
+</script>
+
+</head>
+
+<body>
+
+<center>
+<h1 id="header"></h1>
+<table id="piano" class="fixed" style="border-collapse: collapse; border: none;">
+</table>
+<br>
+<table id="sheet" class="fixed" style="border-collapse: collapse; border: none;">
+</table>
+</center>
+
+</body>
+</html>

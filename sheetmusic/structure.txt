@@ -1,0 +1,46 @@
+Music_TrainerBattle_Ch0::
+	tempo 112
+	volume 7, 7
+	duty 3
+	vibrato 6, 3, 4
+	toggleperfectpitch
+	notetype 12, 11, 2
+	rest 8
+	octave 3
+	F_ 1
+
+Music_TrainerBattle_branch_22962::
+	notetype 12, 11, 5
+	D_ 2
+	A# 1
+	loopchannel 0, Music_TrainerBattle_branch_22962
+
+
+Music_TrainerBattle_Ch1::
+	duty 3
+	vibrato 10, 2, 5
+	notetype 12, 12, 2
+	octave 4
+	A_ 1
+
+Music_TrainerBattle_branch_22bfc::
+	notetype 12, 12, 7
+	octave 3
+	B_ 6
+	G_ 8
+	loopchannel 0, Music_TrainerBattle_branch_22bfc
+
+
+Music_TrainerBattle_Ch2::
+	vibrato 0, 2, 0
+	notetype 12, 1, 4
+	octave 3
+	B_ 1
+	C_ 2
+
+Music_TrainerBattle_branch_22d9c::
+	octave 2
+	A# 1
+	C_ 2
+	loopchannel 0, Music_TrainerBattle_branch_22d9c
+
