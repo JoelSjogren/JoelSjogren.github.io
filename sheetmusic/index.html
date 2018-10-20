@@ -7,11 +7,11 @@ var br = function() { return document.createElement("br"); }
 
 window.onload = function() {
 
-  links = document.getElementById("links");
+    pieces = document.getElementById("pieces");
 
-  loadLinks(['audio/headers/musicheaders1.asm',
-             'audio/headers/musicheaders2.asm',
-             'audio/headers/musicheaders3.asm']);
+    loadLinks(['audio/headers/musicheaders1.asm',
+               'audio/headers/musicheaders2.asm',
+               'audio/headers/musicheaders3.asm']);
 	     
 }
 
@@ -22,7 +22,6 @@ loadLinks = function(xs) {
   client.open('GET', xs[0]);
   client.onloadend = function() {
     addAllLinks(parseMeta(client.responseText));
-    links.append(br());
     loadLinks(xs.slice(1));
   }
   client.send();
@@ -46,30 +45,72 @@ addAllLinks = function(xs) {
 }
 
 addLink = function(x) {
-  var link = document.createElement("a");
-  link.href = `show.html?name=${x['name']}&channels=${x['channels']}`
-  link.text = x['name'];
-  links.append(link);
-  links.append(br());
+    var div = document.createElement("div");
+
+    var img = document.createElement("img");
+    img.src = "thumb/" + x['name'].toLowerCase() + ".png";
+    div.append(img);
+
+    var a = document.createElement("a");
+    a.href = `show.html?name=${x['name']}&channels=${x['channels']}`
+    a.append(x['name']);
+    div.append(a);
+    
+    pieces.append(div);
 }
 
 </script>
+
+<style>
+body {
+    background-image: url("bg.png");
+    background-repeat: repeat;
+//background-color: #eeeeee;
+}
+
+h1 {
+    color: #16c363;
+    text-shadow: 1px 1px #000000;
+}
+
+h2 {
+    color: #ff70a0;
+    text-shadow: 1px 1px #000000;
+}
+
+div.pieces {
+    
+}
+
+div.pieces div {
+    width: 160px;
+    height: 200px;
+//    outline: 1px solid lightgrey;
+    float: left;
+    margin: 4px;
+    background: #eeeeee;
+}
+</style>
+
 </head>
 
 <body>
+  <center>
+    <h1>Assembly Sheet Music</h1>
+    <h2>Pokemon Red, Blue, Yellow</h2>
+    <img src="cover/red.jpg" width="250px"/>
+    <img src="cover/blue.jpg" width="250px"/>
+    <img src="cover/yellow.jpeg" width="250px"/>
+    <div class="pieces" id="pieces"></div>
+    <h2>Pokemon Gold, Silver, Crystal</h2>
+    <img src="cover/gold.png" width="250px"/>
+    <img src="cover/silver.png" width="250px"/>
+    <img src="cover/crystal.jpg" width="250px"/>
+    <div class="pieces" id="pieces2"></div>
 
-<table cellspacing="0" cellpadding="0" class="fixed">
-  <tr>
-    <td>
-      <img src="redcover.jpg" width="400px"/>
-      <br>
-      <img src="bluecover.jpg" width="400px"/>
-    </td>
-    <td id="links">
-    </td>
-  </tr>
-</table>
-
+    </center>
+  <br>
+  Based on the <a href="https://github.com/pret">Pokemon disassembly project</a> at github.
 </body>
 </html>
  
