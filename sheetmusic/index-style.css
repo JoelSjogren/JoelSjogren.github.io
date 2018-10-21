@@ -1,0 +1,26 @@
+body {
+    background-image: url("bg.png");
+    background-repeat: repeat;
+}
+
+h1 {
+    color: #16c363;
+    text-shadow: 1px 1px #000000;
+}
+
+h2 {
+    color: #ff70a0;
+    text-shadow: 1px 1px #000000;
+}
+
+div.pieces {
+    
+}
+
+div.pieces div {
+    width: 160px;
+    height: 200px;
+    float: left;
+    margin: 4px;
+    background: #eeeeee;
+}
