@@ -105,7 +105,7 @@ var gsc = {
     },
 
     compileChannel: function(a, id) {
-	/* Model of the coding of channels:
+	/* Model of the coding of channels: (a bit outdated)
 	    - there is an initial block
 	    - if a block ends with 'loopchannel',
 	      that will determine the periodicity
@@ -114,6 +114,7 @@ var gsc = {
 	    - the current octave is a global variable
 	*/
 
+	/*
 	var boot = [];
 	var loop = [];
 	
@@ -132,11 +133,62 @@ var gsc = {
 		    loop = loop.concat(gsc.inline(a[k]));
 		}
 		if (line[0] == 'loopchannel') {
-		    return {boot: boot, loop: loop};
+		    var times = parseInt(line[1]);
+		    var target = line[2];
+		    if (line[1] == '0') {
+			return {boot: boot, loop: loop};
+		    }
+		    
 		}
 	    }
 	    boot = boot.concat(loop);
 	    loop = [];
+	}
+	*/
+
+
+	// new version
+	/*var*/ events = [];
+	/*var*/ outline = {};
+	
+	/*var*/ ids = a.map(function(aj) { return aj[0][1]; });
+	for (var i = ids.indexOf(id); i < a.length; i++) {
+	    console.log(`chan_id=${id}, i=${i}, block_id=${ids[i]}`);
+	    outline[ids[i]] = events.length;
+	    for (var j = 1; j < a[i].length; j++) {
+		var line = a[i][j];
+		if (line[0] == 'octave') {
+		    gsc.octave = parseInt(line[1]);
+		}
+		if (line[0] == 'note') {
+		    events.push(gsc.extractNote(line));
+		}
+		if (line[0] == 'callchannel') {
+		    var k = ids.indexOf(line[1]);
+		    events = events.concat(gsc.inline(a[k]));
+		}
+		if (line[0] == 'loopchannel') {
+		    /*var*/ times = parseInt(line[1]);
+		    /*var*/ target = line[2];
+		    console.log(line);
+		    var k = outline[target];
+		    console.log(k);
+		    if (k === undefined) {
+			return;
+		    }
+		    var loop = events.slice(k);
+		    console.log(`len=${loop.length}`);
+		    if (times == 0) {
+			var boot = events.slice(0, k);
+			return {boot: boot, loop: loop};
+		    } else {
+			for (var m = 1; m < times; m++) {
+			    events = events.concat(loop);
+			}
+		    }
+		    
+		}
+	    }
 	}
     },
 
@@ -167,6 +219,15 @@ var gsc = {
 	    }
 	    if (line[0] == 'note') {
 		b.push(gsc.extractNote(line));
+	    }
+	    if (line[0] == 'loopchannel') {
+		var times = parseInt(line[1]);
+		var target = line[2];
+		if (target !== a[0][1]) return;
+		var loop = b.slice(0);
+		for (var m = 1; m < times; m++) {
+		    b = b.concat(loop);
+		}
 	    }
 	}
 	return b;

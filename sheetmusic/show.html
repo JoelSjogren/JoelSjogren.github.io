@@ -104,8 +104,14 @@
 	      return;
 	  }
 
-	  // temporary hack
+	  // temporary hacks
 	  if (game.piece == "Route1" && chan == 2) {
+	      key -= 12;
+	  }
+	  if (game.piece == "ChampionBattle" && chan == 2) {
+	      key -= 12;
+	  }
+	  if (game.piece == "KantoTrainerBattle" && chan == 2) {
 	      key -= 12;
 	  }
 	  
