@@ -76,7 +76,7 @@
 	      for (var s = smin; s < smax; s++) {
 		  var cell = document.createElement("td");
 		  var blackKey = [1,3,6,8,10].indexOf(s % 12) != -1;
-		  cell.bgColor = blackKey ? "#F7F7F7" : "#FFFFFF";
+		  cell.bgColor = blackKey ? /*"#F7F7F7"*/ "F0F0F0" : "#FFFFFF";
 		  cell.width = sscale;
 		  cell.height = tscale;
 		  cell.appendChild(document.createTextNode(""));
