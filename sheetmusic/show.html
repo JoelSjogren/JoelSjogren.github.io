@@ -7,7 +7,7 @@
 
       var sscale = "10px";
       var tscale = "15px"; var double_tscale = "30px";
-      var tmax = 1000;
+      var tmax = 1200;
       var smin = 0;
       var smax = 100;
 
@@ -112,6 +112,9 @@
 	      key -= 12;
 	  }
 	  if (game.piece == "KantoTrainerBattle" && chan == 2) {
+	      key -= 12;
+	  }
+	  if (game.piece == "TrainerBattle" && chan == 2) {
 	      key -= 12;
 	  }
 	  
