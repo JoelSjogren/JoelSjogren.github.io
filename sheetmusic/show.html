@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="rby/midi.js"></script>
+    <script src="gsc/midi.js"></script>
     <script>
 
       var sscale = "10px";
@@ -9,27 +11,44 @@
       var smin = 0;
       var smax = 100;
 
-      var name;
-      var channels;
-
       var chromatic = ['C_', 'C#', 'D_', 'D#', 'E_', 'F_', 'F#', 'G_', 'G#', 'A_', 'A#', 'B_'];
+      
+      var game;  // the assembly reader will be stored here
+      var asm;   // the assembly code will be stored here
+      var prog;  // the "midi" will be stored here
 
       window.onload = function() {
 
-	  var regex1 = /piece=([a-zA-Z0-9]*)&channels=([a-zA-Z,0-9]*)/;
+	  var regex1 = /game=([a-zA-Z0-9]*)&(.*)/;
 	  var tmp = regex1.exec(window.location.href);
-	  name = tmp[1];
-	  channels = tmp[2].split(',');
+
+	  game = lookupGame(tmp[1]);
+	  game.configure(tmp[2]);
 
 	  setHeader();
 	  makePiano();
-	  loadAsmMusicFile();
+	  loadFile();
 
+      }
+
+      lookupGame = function(id) {
+	  return window[id];
+      }
+
+      loadFile = function() {
+	  var client = new XMLHttpRequest();
+	  client.open('GET', game.path);
+	  client.onloadend = function() {
+	      asm = client.responseText;
+	      prog = game.load(asm);
+	      render();
+	  }
+	  client.send();
       }
 
       setHeader = function() {
 	  header = document.getElementById("header");
-	  header.innerText = "Pokemon RBY - " + name;
+	  header.innerText = game.name + ' - ' + game.piece;
       }
 
       makePiano = function() {
@@ -66,61 +85,27 @@
 	  };
       }
 
-      loadAsmMusicFile = function() {
-	  var path = 'rby/audio/music/' + name.toLowerCase() + '.asm';
-
-	  var client = new XMLHttpRequest();
-	  client.open('GET', path);
-	  client.onloadend = function() {
-	      file = client.responseText;
-	      renderAsmMusicFile(file);
-	  }
-	  client.send();
-      }
-
-      renderAsmMusicFile = function(text) {
-	  for (var i = 0; i < channels.length; i++) {
-	      renderAsmMusicChannel(text, i);
-	  }
-      }
-
-      renderAsmMusicChannel = function(text, i) {
-	  lines = text.split('\n');
-	  var state = 'looking';
-	  var goal = 'Music_' + name + '_' + channels[i];
-	  var octave;
-	  var t = 0;
-	  for (var j = 0; j < lines.length; j++) {
-	      if (t + 16 >= tmax) return;
-	      if (state == 'looking' && lines[j].startsWith(goal)) {
-		  state = 'copying';
-	      } else if (state == 'copying') {
-		  if (lines[j].startsWith('\toctave')) {
-		      octave = Number(lines[j][1+'octave'.length+1]);
-		  }
-		  var k = chromatic.indexOf(lines[j].slice(1, 3));
-		  if (k != -1) {
-		      var dt = Number(lines[j].split(' ')[1]);
-		      renderNote(12*octave + k, t, dt, channels[i]);
-		      t += dt;
-		  }
-		  if (lines[j].startsWith('\trest')) {
-		      var dt = Number(lines[j].split(' ')[1]);
-		      t += dt;
-		  }
-	      } else if (state == 'copying' && lines[j].startsWith('\tloopchannel')) {
-		  return;
+      render = function() {
+	  for (var i = 0; i < prog.chan.length; i++) {
+	      var chan = prog.chan[i].boot.concat(prog.chan[i].loop);
+	      var t = 0;
+	      for (var j = 0; j < chan.length; j++) {
+		  var [key,dt] = chan[j];
+		  renderNote(key, t, dt, i);
+		  t += dt;
 	      }
 	  }
       }
 
       renderNote = function(key, t, dt, chan) {
-	  channelColors = {'Ch0': 'red', 'Ch1': 'green', 'Ch2': 'blue', 'Ch3': 'orange'};
+	  channelColors = ['red', 'green', 'blue', 'orange'];
+
+	  if (key == undefined || t + dt >= tmax) return;
+	  
 	  for (var i = 0; i < dt; i++) {
 	      sheet.rows[t+i].cells[key-smin].bgColor =
 		  i == 0 ? channelColors[chan] : '#BBBBBB';
 	  }
-	  
       }
 
 

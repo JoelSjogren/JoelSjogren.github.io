@@ -16,7 +16,7 @@ var gsc = {
 	    add({
 		'name': x[1],
 		'thumb': 'gsc/thumb/' + x[1].toLowerCase() + '.png',
-		'persist': 'nothing'
+		'persist': `piece=${x[1]}`
 	    });
 	}
     }

@@ -1,9 +1,9 @@
 var rby = {
 
     parse: function(add) {
-	rby.loadLinks(['audio/headers/musicheaders1.asm',
-		       'audio/headers/musicheaders2.asm',
-		       'audio/headers/musicheaders3.asm'], add);
+	rby.loadLinks(['rby/audio/headers/musicheaders1.asm',
+		       'rby/audio/headers/musicheaders2.asm',
+		       'rby/audio/headers/musicheaders3.asm'], add);
     },
 
     loadLinks: function(xs, add) {
