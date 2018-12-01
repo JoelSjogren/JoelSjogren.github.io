@@ -100,7 +100,14 @@
       renderNote = function(key, t, dt, chan) {
 	  channelColors = ['red', 'green', 'blue', 'orange'];
 
-	  if (key == undefined || t + dt >= tmax) return;
+	  if (key == undefined || t + dt >= tmax) {
+	      return;
+	  }
+
+	  // temporary hack
+	  if (game.piece == "Route1" && chan == 2) {
+	      key -= 12;
+	  }
 	  
 	  for (var i = 0; i < dt; i++) {
 	      sheet.rows[t+i].cells[key-smin].bgColor =
