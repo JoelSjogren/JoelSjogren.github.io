@@ -76,7 +76,7 @@
 	      for (var s = smin; s < smax; s++) {
 		  var cell = document.createElement("td");
 		  var blackKey = [1,3,6,8,10].indexOf(s % 12) != -1;
-		  cell.bgColor = blackKey ? /*"#F7F7F7"*/ "F0F0F0" : "#FFFFFF";
+		  cell.bgColor = blackKey ? "E0E0E0" : "#FFFFFF";
 		  cell.width = sscale;
 		  cell.height = tscale;
 		  cell.appendChild(document.createTextNode(""));
@@ -104,7 +104,7 @@
 	  
 	  for (var i = 0; i < dt; i++) {
 	      sheet.rows[t+i].cells[key-smin].bgColor =
-		  i == 0 ? channelColors[chan] : '#BBBBBB';
+		  i == 0 ? channelColors[chan] : '#808080';
 	  }
       }
 
