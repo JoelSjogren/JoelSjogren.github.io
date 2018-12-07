@@ -105,7 +105,7 @@ var gsc = {
     },
 
     compileChannel: function(a, id) {
-	/* Model of the coding of channels: (a bit outdated)
+	/* Model of the coding of channels: (a bit outdated) (never perfect)
 	    - there is an initial block
 	    - if a block ends with 'loopchannel',
 	      that will determine the periodicity
@@ -114,40 +114,6 @@ var gsc = {
 	    - the current octave is a global variable
 	*/
 
-	/*
-	var boot = [];
-	var loop = [];
-	
-	var ids = a.map(function(aj) { return aj[0][1]; });
-	for (var i = ids.indexOf(id); i < a.length; i++) {
-	    for (var j = 1; j < a[i].length; j++) {
-		var line = a[i][j];
-		if (line[0] == 'octave') {
-		    gsc.octave = parseInt(line[1]);
-		}
-		if (line[0] == 'note') {
-		    loop.push(gsc.extractNote(line));
-		}
-		if (line[0] == 'callchannel') {
-		    var k = ids.indexOf(line[1]);
-		    loop = loop.concat(gsc.inline(a[k]));
-		}
-		if (line[0] == 'loopchannel') {
-		    var times = parseInt(line[1]);
-		    var target = line[2];
-		    if (line[1] == '0') {
-			return {boot: boot, loop: loop};
-		    }
-		    
-		}
-	    }
-	    boot = boot.concat(loop);
-	    loop = [];
-	}
-	*/
-
-
-	// new version
 	/*var*/ events = [];
 	/*var*/ outline = {};
 	
@@ -186,7 +152,9 @@ var gsc = {
 			    events = events.concat(loop);
 			}
 		    }
-		    
+		}
+		if (line[0] == 'endchannel') {
+		    return {boot: events, loop: []};
 		}
 	    }
 	}
