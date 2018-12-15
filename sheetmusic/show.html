@@ -121,6 +121,9 @@
 	  if (game.piece == "TrainerBattle" && chan == 2) {
 	      key -= 12;
 	  }
+	  if (game.piece == "Credits" && chan == 3) {
+	      return;
+	  }
 	  
 	  for (var i = 0; i < dt; i++) {
 	      var cell = sheet.rows[t+i].cells[key-smin];
