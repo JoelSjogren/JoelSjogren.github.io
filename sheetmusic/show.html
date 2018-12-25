@@ -81,20 +81,18 @@
 		  cell.height = tscale;
 		  cell.appendChild(document.createTextNode(""));
 		  row.appendChild(cell);
-	      };
-	  };
+	      }
+	  }
       }
 
       render = function() {
-	  for (var stacatto = 0; stacatto < 2; stacatto++) {
-	      for (var i = 0; i < prog.chan.length; i++) {
-		  var chan = prog.chan[i].boot.concat(prog.chan[i].loop);
-		  var t = 0;
-		  for (var j = 0; j < chan.length; j++) {
-		      var [key,dt] = chan[j];
-		      renderNote(key, t, dt, i);
-		      t += dt;
-		  }
+	  for (var i = 0; i < prog.chan.length; i++) {
+	      var chan = prog.chan[i].boot.concat(prog.chan[i].loop);
+	      var t = 0;
+	      for (var j = 0; j < chan.length; j++) {
+	          var [key,dt] = chan[j];
+	          renderNote(key, t, dt, i);
+	          t += dt;
 	      }
 	  }
       }
@@ -127,8 +125,10 @@
 	  
 	  for (var i = 0; i < dt; i++) {
 	      var cell = sheet.rows[t+i].cells[key-smin];
-	      cell.bgColor = i == 0 ? channelColors[chan] : '#808080';
-	      if (stacatto) return;
+	      if (i == 0) {
+	      	 cell.style.borderTop = "4px solid " + channelColors[chan];
+	      }
+	      cell.bgColor = '#808080';
 	  }
       }
 
