@@ -114,15 +114,18 @@ var gsc = {
 	    - the current octave is a global variable
 	*/
 
-	/*var*/ events = [];
-	/*var*/ outline = {};
+	var events = [];
+	var outline = {};
 	
-	/*var*/ ids = a.map(function(aj) { return aj[0][1]; });
+	var ids = a.map(function(aj) { return aj[0][1]; });
 	for (var i = ids.indexOf(id); i < a.length; i++) {
 	    console.log(`chan_id=${id}, i=${i}, block_id=${ids[i]}`);
 	    outline[ids[i]] = events.length;
 	    for (var j = 1; j < a[i].length; j++) {
 		var line = a[i][j];
+		if (line[0] == 'notetype') {
+		    gsc.timeunit = parseInt(line[1].slice(1), 16);
+		}
 		if (line[0] == 'octave') {
 		    gsc.octave = parseInt(line[1]);
 		}
@@ -134,16 +137,16 @@ var gsc = {
 		    events = events.concat(gsc.inline(a[k]));
 		}
 		if (line[0] == 'loopchannel') {
-		    /*var*/ times = parseInt(line[1]);
-		    /*var*/ target = line[2];
-		    console.log(line);
+		    var times = parseInt(line[1]);
+		    var target = line[2];
+		    //console.log(line);
 		    var k = outline[target];
-		    console.log(k);
+		    //console.log(k);
 		    if (k === undefined) {
 			return;
 		    }
 		    var loop = events.slice(k);
-		    console.log(`len=${loop.length}`);
+		    //console.log(`len=${loop.length}`);
 		    if (times == 0) {
 			var boot = events.slice(0, k);
 			return {boot: boot, loop: loop};
@@ -174,7 +177,7 @@ var gsc = {
 	    abs = 12 * gsc.octave;
 	    abs += gsc.chromatic.indexOf(tone);
 	}
-	var duration = parseInt(line[2]);
+	var duration = parseInt(line[2]) * gsc.timeunit;
 	return [abs, duration];
     },
 
@@ -182,6 +185,9 @@ var gsc = {
 	var b = [];
 	for (var i = 1; i < a.length; i++) {
 	    var line = a[i];
+	    if (line[0] == 'notetype') {
+		gsc.timeunit = parseInt(line[1].slice(1), 16);
+	    }
 	    if (line[0] == 'octave') {
 		gsc.octave = parseInt(line[1]);
 	    }

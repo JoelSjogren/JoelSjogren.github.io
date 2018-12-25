@@ -31,22 +31,28 @@ var rby = {
 	var state = 'looking';
 	var goal = 'Music_' + rby.piece + '_' + rby.channels[i];
 	var octave;
+	var timeunit;
 	var loop = [];
 	for (var j = 0; j < lines.length; j++) {
 	    if (state == 'looking' && lines[j].startsWith(goal)) {
 		state = 'copying';
 	    } else if (state == 'copying') {
+		if (lines[j].startsWith('\tnotetype')) {
+		    var start = 1 + 'notetype'.length+1;
+		    var end = lines[j].indexOf(',');
+		    timeunit = parseInt(lines[j].slice(start, end));
+		}
 		if (lines[j].startsWith('\toctave')) {
 		    octave = Number(lines[j][1+'octave'.length+1]);
 		}
 		var k = chromatic.indexOf(lines[j].slice(1, 3));
 		if (k != -1) {
 		    var dt = Number(lines[j].split(' ')[1]);
-		    loop.push([12*octave + k, dt])
+		    loop.push([12*octave + k, dt*timeunit])
 		}
 		if (lines[j].startsWith('\trest')) {
 		    var dt = Number(lines[j].split(' ')[1]);
-		    loop.push([undefined, dt]);
+		    loop.push([undefined, dt*timeunit]);
 		}
 		if (lines[j].startsWith('\tloopchannel')) {
 		    break;
