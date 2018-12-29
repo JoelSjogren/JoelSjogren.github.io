@@ -32,6 +32,7 @@ var rby = {
 	var goal = 'Music_' + rby.piece + '_' + rby.channels[i];
 	var octave;
 	var timeunit;
+	var boot = [];
 	var loop = [];
 	for (var j = 0; j < lines.length; j++) {
 	    if (state == 'looking' && lines[j].startsWith(goal)) {
@@ -57,9 +58,13 @@ var rby = {
 		if (lines[j].startsWith('\tloopchannel')) {
 		    break;
 		}
+		if (lines[j].indexOf('::') != -1) {
+		    boot = boot.concat(loop);
+		    loop = [];
+		}
 	    }
 	}
-	return  {boot: [], loop: loop};
+	return  {boot: boot, loop: loop};
     }
 
 }
