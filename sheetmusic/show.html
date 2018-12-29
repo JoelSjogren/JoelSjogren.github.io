@@ -147,6 +147,10 @@
 	  s = key - smin;
 	  ctx.fillRect(s*sscale, t*tscale,
 	               sscale, dt*tscale);
+	  ctx.moveTo(s*sscale, t*tscale);
+	  ctx.lineTo((s+1)*sscale, t*tscale);
+	  ctx.strokeStyle = channelColors[chan]; //"#000000";
+	  ctx.stroke();
       }
 
 
