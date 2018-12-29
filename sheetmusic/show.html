@@ -7,7 +7,7 @@
     <script>
 
       var width = 1000;
-      var height = 15000;
+      var height; // = 15000;
 
       var sscale = 10;
       var tscale = 1;
@@ -35,7 +35,6 @@
 	  game.configure(tmp[2]);
 
 	  setHeader();
-	  makePiano();
 	  loadFile();
 
       }
@@ -50,9 +49,27 @@
 	  client.onloadend = function() {
 	      asm = client.responseText;
 	      prog = game.load(asm);
+	      height = sheetHeight(prog);
+	      makePiano();
 	      render();
 	  }
 	  client.send();
+      }
+
+      sheetHeight = function() {
+	  var M = 0;
+	  for (var i = 0; i < prog.chan.length; i++) {
+	      var chan = prog.chan[i];
+	      var once = chan.boot.concat(chan.loop);
+	      var m = 0;
+	      for (var j = 0; j < once.length; j++) {
+		  m += once[j][1];
+	      }
+	      if (m > M) {
+		  M = m;
+	      }
+	  }
+	  return M * tscale;
       }
 
       setHeader = function() {
