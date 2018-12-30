@@ -6,7 +6,7 @@ var rby = {
     path: undefined,
 
     configure: function(args) {
-	var regex1 = /piece=([a-zA-Z]*)&channels=([a-zA-Z,0-9]*)/;
+	var regex1 = /piece=([a-zA-Z0-9]*)&channels=([a-zA-Z,0-9]*)/;
 	tmp = regex1.exec(args);
 
 	rby.piece = tmp[1];
