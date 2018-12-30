@@ -1,5 +1,4 @@
 show.html?game=gsc&piece=AfterTheRivalFight
-show.html?game=gsc&piece=Title
 show.html?game=gsc&piece=LookRocket
 show.html?game=gsc&piece=IndigoPlateau
 show.html?game=gsc&piece=JohtoWildBattleNight
@@ -7,5 +6,6 @@ show.html?game=gsc&piece=Capture
 show.html?game=gsc&piece=GsOpening
 show.html?game=gsc&piece=GsOpening2
 show.html?game=gsc&piece=RocketOverture
+
 
 add lines to indicate distinction between boot and loop parts
