@@ -197,7 +197,7 @@ var rby = {
 	for (var i = 1; i < a.length; i++) {
 	    var line = a[i];
 	    if (line[0] == 'notetype') {
-		rby.timeunit = parseInt(line[1].slice(1), 16);
+		rby.timeunit = parseInt(line[1], 10);
 	    }
 	    if (line[0] == 'octave') {
 		rby.octave = parseInt(line[1]);
