@@ -160,6 +160,9 @@
 	  if (game.piece == "Credits" && chan == 3) {
 	      return;
 	  }
+	  if (game.piece == "PokemonTower" && chan == 2) {
+	      key -= 12;
+	  }
 
 	  layer = document.getElementById(`sheet-${chan}`);
 	  ctx = layer.getContext("2d");
