@@ -162,21 +162,17 @@
 	  if (game.piece == "Route1" && chan == 2) {
 	      key -= 12;
 	  }
-	  if (game.piece == "ChampionBattle" && chan == 2) {
-	      key -= 12;
-	  }
 	  if (game.piece == "KantoTrainerBattle" && chan == 2) {
-	      key -= 12;
-	  }
-	  if (game.piece == "TrainerBattle" && chan == 2) {
 	      key -= 12;
 	  }
 	  if (game.piece == "Credits" && chan == 3) {
 	      return;
 	  }
-	  if (game.piece == "PokemonTower" && chan == 2) {
+	  // slightly less of a hack
+	  if (game.name == "Pokemon RBY" && chan == 2) {
 	      key -= 12;
 	  }
+	  
 
 	  layer = document.getElementById(`sheet-${chan}`);
 	  ctx = layer.getContext("2d");
