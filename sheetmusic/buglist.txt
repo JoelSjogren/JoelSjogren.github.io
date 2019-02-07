@@ -9,3 +9,5 @@ show.html?game=gsc&piece=RocketOverture
 
 
 add lines to indicate distinction between boot and loop parts
+
+rby/Surfing should be 3/4

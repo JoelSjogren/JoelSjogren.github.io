@@ -107,7 +107,21 @@
 	      ctx.moveTo((s-smin)*sscale,0);
 	      ctx.lineTo((s-smin)*sscale,height);
 	  }
-	  for (var t = 0; t*tscale < height; t += 48) {
+	  
+	  var t = 0;
+	  
+	  // hacks
+	  if (game.name === "Pokemon RBY" && game.piece === "Routes1") {
+	      t = 24;
+	  }
+	  if (game.name === "Pokemon RBY" && game.piece === "Routes3") {
+	      t = 24;
+	  }
+	  if (game.name === "Pokemon RBY" && game.piece === "BikeRiding") {
+	      t = 24;
+	  }
+	  
+	  for (; t*tscale < height; t += 48) {
 	      ctx.moveTo(0,t*tscale);
 	      ctx.lineTo(width,t*tscale);
 	  }
