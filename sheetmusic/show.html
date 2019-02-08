@@ -168,6 +168,9 @@
 	  if (game.piece == "Credits" && chan == 3) {
 	      return;
 	  }
+	  if (game.piece == "KantoTrainerBattle") {
+	      key -= 1;
+	  }
 	  // slightly less of a hack
 	  if (game.name == "Pokemon RBY" && chan == 2) {
 	      key -= 12;
