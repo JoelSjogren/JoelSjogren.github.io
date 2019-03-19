@@ -25,7 +25,8 @@ var gsc = {
 		'JohtoGymLeaderBattle': 'JohtoGymBattle',
 		'ProfElm': 'ElmsLab',
 		'BugCatchingContestRanking': 'ContestResults',
-		
+		'GsOpening': 'GoldSilverOpening',
+		'GsOpening2': 'GoldSilverOpening2',
 	    };
 	    var encounters = [
 		'Hiker', 'Lass', 'Officer', 'Rival',
