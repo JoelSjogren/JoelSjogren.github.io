@@ -54,7 +54,7 @@
 	      duration = sheetDuration(prog);
 	      height = duration * tscale;
 	      makePiano();
-	      render();
+	      render(duration);
 	  }
 	  client.send();
       }
@@ -143,7 +143,7 @@
 	  ctx.stroke()
       }
 
-      render = function() {
+      render = function(duration) {
           var layers_div = document.getElementById("sheet-layers");
 	  for (var i = 0; i < prog.chan.length; i++) {
 	      var layer = document.createElement("canvas");
@@ -153,12 +153,24 @@
 	      layer.style = `${layer_style} z-index: ${i};`;
 	      layers_div.appendChild(layer);
 	      sheet_layers.push(layer);
-	      var chan = prog.chan[i].boot.concat(prog.chan[i].loop);
+
+	      var boot = prog.chan[i].boot;
+	      var loop = prog.chan[i].loop;
 	      var t = 0;
-	      for (var j = 0; j < chan.length; j++) {
-	          var [key,dt] = chan[j];
+	      for (var j = 0; j < boot.length; j++) {
+	          var [key,dt] = boot[j];
 	          renderNote(key, t, dt, i);
 	          t += dt;
+	      }
+	      while (t < duration) {
+		  var progress = 0;
+		  for (var j = 0; j < loop.length && t < duration; j++) {
+	              var [key,dt] = loop[j];
+	              renderNote(key, t, dt, i);
+	              t += dt;
+		      if (dt > 0) progress = 1;
+		  }
+		  if (!progress) break;
 	      }
 	  }
       }
