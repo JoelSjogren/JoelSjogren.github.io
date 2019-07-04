@@ -27,6 +27,8 @@ var gsc = {
 		'BugCatchingContestRanking': 'ContestResults',
 		'GsOpening': 'GoldSilverOpening',
 		'GsOpening2': 'GoldSilverOpening2',
+		'Capture': 'SuccessfulCapture',
+		'RocketOverture': 'RocketTheme',
 	    };
 	    var encounters = [
 		'Hiker', 'Lass', 'Officer', 'Rival',
