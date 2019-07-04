@@ -60,6 +60,10 @@
       }
 
       sheetDuration = function() {
+	  if (game.name === "Pokemon GSC" && game.piece === "RuinsOfAlphInterior") {
+	      return 288 * 2;  // to account for polyrhythm
+	  }
+	  
 	  var M = 0;
 	  for (var i = 0; i < prog.chan.length; i++) {
 	      var chan = prog.chan[i];
