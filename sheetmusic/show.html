@@ -120,11 +120,22 @@
 	  if (game.name === "Pokemon RBY" && game.piece === "BikeRiding") {
 	      t = 24;
 	  }
+	  if (game.name === "Pokemon RBY" && game.piece === "MeetProfOak") {
+	      t = 24;
+	  }
+	  if (game.name === "Pokemon RBY" && game.piece === "MeetFemaleTrainer") {
+	      t = 24;
+	  }
 	  if (game.name === "Pokemon GSC" && game.piece === "AzaleaTown") {
 	      t = 24;
 	  }
+
+	  var timeunit = 48;
+	  if (game.name === "Pokemon RBY" && game.piece === "Surfing") {
+	      timeunit = 72;
+	  }
 	  
-	  for (; t*tscale < height; t += 48) {
+	  for (; t*tscale < height; t += timeunit) {
 	      ctx.moveTo(0,t*tscale);
 	      ctx.lineTo(width,t*tscale);
 	  }
