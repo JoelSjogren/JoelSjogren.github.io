@@ -133,7 +133,6 @@ var gsc = {
 		    events.push(gsc.extractNote(line));
 		}
 		if (line[0] == 'callchannel') {
-		    var k = ids.indexOf(line[1]);
 		    for (var k = ids.indexOf(line[1]); true; k++) {
 			events = events.concat(gsc.inline(a[k]));
 			if (a[k][a[k].length - 1][0] == "endchannel") {
