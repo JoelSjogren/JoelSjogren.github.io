@@ -134,7 +134,12 @@ var gsc = {
 		}
 		if (line[0] == 'callchannel') {
 		    var k = ids.indexOf(line[1]);
-		    events = events.concat(gsc.inline(a[k]));
+		    for (var k = ids.indexOf(line[1]); true; k++) {
+			events = events.concat(gsc.inline(a[k]));
+			if (a[k][a[k].length - 1][0] == "endchannel") {
+			    break;
+			}
+		    }
 		}
 		if (line[0] == 'loopchannel') {
 		    var times = parseInt(line[1]);
