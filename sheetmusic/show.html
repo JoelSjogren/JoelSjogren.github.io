@@ -171,6 +171,9 @@
       render = function(duration) {
           var layers_div = document.getElementById("sheet-layers");
 	  for (var i = 0; i < prog.chan.length; i++) {
+	      if (i == 2 && prog.name == "Music_MtMoon") {
+		  continue;
+	      }
 	      var layer = document.createElement("canvas");
 	      layer.id = `sheet-${i}`;
 	      layer.width = width;
