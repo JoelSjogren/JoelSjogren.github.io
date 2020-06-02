@@ -159,11 +159,22 @@
 	  if (game.name === "Pokemon RBY" && game.piece === "Surfing") {
 	      timeunit = 72;
 	  }
-	  
-	  for (; t*tscale < height; t += timeunit) {
-	      ctx.moveTo(0,t*tscale);
-	      ctx.lineTo(width,t*tscale);
+
+	  if (game.name == "Pokemon GSC" && game.piece == "GoldSilverOpening") {
+	      bars = [].concat(Array(24).fill(4),
+			       Array(19).fill(6),
+			       Array(8).fill(4));
+	      for (var i = 0; i < bars.length; t += 12 * bars[i], i++) {
+		  ctx.moveTo(0,t*tscale);
+		  ctx.lineTo(width,t*tscale);
+	      }
+	  } else {
+	      for (; t*tscale < height; t += timeunit) {
+		  ctx.moveTo(0,t*tscale);
+		  ctx.lineTo(width,t*tscale);
+	      }
 	  }
+	  
 	  ctx.strokeStyle = "#f0f0f0";
 	  ctx.stroke()
       }
