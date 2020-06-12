@@ -1,13 +1,14 @@
 show.html?game=gsc&piece=AfterTheRivalFight
-show.html?game=gsc&piece=LookRocket
-show.html?game=gsc&piece=IndigoPlateau
 show.html?game=gsc&piece=JohtoWildBattleNight
-show.html?game=gsc&piece=Capture
-show.html?game=gsc&piece=GsOpening
-show.html?game=gsc&piece=GsOpening2
-show.html?game=gsc&piece=RocketOverture
+show.html?game=gsc&piece=SuccessfulCapture
+show.html?game=gsc&piece=RocketTheme
+show.html?game=gsc&piece=LakeOfRageRocketRadio
 
+yellow/meetjessiejames.asm
+       surfingpikachu.asm
+       yellowintro.asm
+       yellowunusedsong.asm https://www.youtube.com/watch?v=rbQUwiLJZ5o
 
 add lines to indicate distinction between boot and loop parts
 
-rby/Surfing should be 3/4
+crystal/suicune theme https://www.youtube.com/watch?v=PEiRAYy0yDA
