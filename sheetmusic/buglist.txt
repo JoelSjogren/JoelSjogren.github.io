@@ -2,7 +2,8 @@ show.html?game=gsc&piece=AfterTheRivalFight
 show.html?game=gsc&piece=JohtoWildBattleNight
 show.html?game=gsc&piece=SuccessfulCapture
 show.html?game=gsc&piece=RocketTheme
-show.html?game=gsc&piece=LakeOfRageRocketRadio
+
+show.html?game=gsc&piece=LakeOfRageRocketRadio https://www.youtube.com/watch?v=awtJoVOFXbE
 
 yellow/meetjessiejames.asm
        surfingpikachu.asm
