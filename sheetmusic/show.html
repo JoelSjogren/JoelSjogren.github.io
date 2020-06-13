@@ -183,7 +183,8 @@
       }
 
       render = function(duration) {
-	  if (game.name == "Pokemon GSC") {  // change key
+	  if (game.name == "Pokemon GSC" && prog.name == "Music_PostCredits") {
+	      // change key
 	      for (var i = 0; i < 2; i++) {
 		  var tmp = [prog.chan[i].boot, prog.chan[i].loop];
 		  for (var j = 0; j < 2; j++) {
