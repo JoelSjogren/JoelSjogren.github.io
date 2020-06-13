@@ -183,6 +183,17 @@
       }
 
       render = function(duration) {
+	  if (game.name == "Pokemon GSC") {  // change key
+	      for (var i = 0; i < 2; i++) {
+		  var tmp = [prog.chan[i].boot, prog.chan[i].loop];
+		  for (var j = 0; j < 2; j++) {
+		      for (var k = 0; k < tmp[j].length; k++) {
+			  tmp[j][k][0] += 3;
+		      }
+		  }
+	      }
+	  }
+	  
           var layers_div = document.getElementById("sheet-layers");
 	  for (var i = 0; i < prog.chan.length; i++) {
 	      if (i == 2 && prog.name == "Music_MtMoon") {
