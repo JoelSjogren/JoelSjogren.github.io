@@ -1,0 +1,42 @@
+== RBY, 45 tracks ==
+IntroBattle TitleScreen PalletTown MeetProfOak OaksLab MeetRival TrainerBattle DefeatedTrainer
+Routes1 WildBattle DefeatedWildMon Cities1(Pewter,Viridian,Saffron) Dungeon2(ViridianForest) Pokecenter PkmnHealed
+MuseumGuy Routes3 MeetFemaleTrainer MeetMaleTrainer Dungeon3(MtMoon,VictoryRoad) JigglypuffSong
+Cities2(Fuchsia,Cerulean) Routes2 BikeRiding Celadon GameCorner Vermilion SSAnne
+Lavender PokemonTower Routes4 SilphCo SafariZone Surfing Cinnabar
+CinnabarMansion Dungeon1(RocketHideout,CeruleanCave,PowerPlant)
+Gym MeetEvilTrainer GymLeaderBattle DefeatedGymLeader IndigoPlateau FinalBattle HallOfFame Credits
+
+
+
+walkthrough: https://strategywiki.org/wiki/Pok%C3%A9mon_Red_and_Blue/Table_of_Contents
+map: https://www.youtube.com/watch?v=amQY--VS-d4
+
+
+
+
+== GSC, 87 tracks ==
+GoldSilverOpening GoldSilverOpening2 TitleScreen MainMenu
+NewBarkTown Mom JohtoWildBattle WildPokemonVictory CherrygroveCity ShowMeAround
+ElmsLab ProfOak LookRival RivalBattle AfterTheRivalFight SproutTower
+LookHiker LookLass LookOfficer LookKimonoGirl LookYoungster LookBeauty LookPokemaniac LookSage
+JohtoTrainerBattle TrainerVictory
+RuinsOfAlphInterior RuinsOfAlphRadio AzaleaTown UnionCave(=IlexForest)
+GoldenrodCity GameCorner NationalPark BugCatchingContest ContestResults
+ProfOaksPokemonTalk PokemonChannel RadioSuccessful PokemonMarch PokemonLullaby Printer
+EcruteakCity(=CianwoodCity) DancingHall BurnedTower TinTower
+OlivineCity(=VioletCity) Lighthouse Surf
+LakeOfRage LakeOfRageRocketRadio RocketHideout RocketTheme LookRocket RocketBattle
+DragonsDen Gym JohtoGymBattle GymLeaderVictory
+Bicycle Route26 Evolution VictoryRoad IndigoPlateau ChampionBattle
+MagnetTrain SaffronCity(=ViridianCity) PalletTown Route1 Route2 Route3 Route12
+KantoTrainerBattle PokemonCenter HealPokemon KantoGymBattle
+MtMoon MtMoonSquare CeladonCity LavenderTown VermilionCity
+PokeFluteChannel KantoWildBattle Capture
+SsAqua
+Route30 DarkCave Route29 Route36 Route37
+HallOfFame Credits PostCredits
+
+PostCredits (Nocturne version)
+  
+
