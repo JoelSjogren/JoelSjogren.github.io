@@ -13,6 +13,9 @@ blue/pokeflute.asm
      unused2_2.asm
      pokeflute_ch6.asm (in battle)
 
+blue/stars on boot
+gold/stars on boot
+
 yellow/meetjessiejames.asm
        surfingpikachu.asm
        yellowintro.asm
