@@ -22,17 +22,17 @@ ElmsLab ProfOak LookRival RivalBattle AfterTheRivalFight SproutTower
 LookHiker LookLass LookOfficer LookKimonoGirl LookYoungster LookBeauty LookPokemaniac LookSage
 JohtoTrainerBattle TrainerVictory
 RuinsOfAlphInterior RuinsOfAlphRadio AzaleaTown UnionCave(=IlexForest)
-GoldenrodCity GameCorner NationalPark BugCatchingContest ContestResults
-ProfOaksPokemonTalk PokemonChannel RadioSuccessful PokemonMarch PokemonLullaby Printer
+GoldenrodCity GameCorner <exit game> NationalPark BugCatchingContest ContestResults
+ProfOaksPokemonTalk <end of talk> PokemonChannel RadioSuccessful PokemonMarch PokemonLullaby Printer
 EcruteakCity(=CianwoodCity) DancingHall BurnedTower TinTower
 OlivineCity(=VioletCity) Lighthouse Surf
 LakeOfRage LakeOfRageRocketRadio RocketHideout RocketTheme LookRocket RocketBattle
 DragonsDen Gym JohtoGymBattle GymLeaderVictory
 Bicycle Route26 Evolution VictoryRoad IndigoPlateau ChampionBattle
-MagnetTrain SaffronCity(=ViridianCity) PalletTown Route1 Route2 Route3 Route12
+MagnetTrain PalletTown Route1 SaffronCity(=ViridianCity) Route2 Route3 Route12
 KantoTrainerBattle PokemonCenter HealPokemon KantoGymBattle
 MtMoon MtMoonSquare CeladonCity LavenderTown VermilionCity
-PokeFluteChannel KantoWildBattle Capture
+PokeFluteChannel KantoWildBattle[snorlax] Capture
 SsAqua
 Route30 DarkCave Route29 Route36 Route37
 HallOfFame Credits PostCredits

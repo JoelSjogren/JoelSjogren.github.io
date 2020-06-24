@@ -15,6 +15,9 @@ blue/pokeflute.asm
 
 blue/stars on boot
 gold/stars on boot
+gold/ruinsofalphradio (some strange polyrhythm?)
+gold/exit game corner game
+gold/end of oak channel talk
 
 yellow/meetjessiejames.asm
        surfingpikachu.asm
