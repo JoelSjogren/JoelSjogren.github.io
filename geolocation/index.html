@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Polygon demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+	  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+	  crossorigin=""/>
+    <style>
+      #mapid { height: 400px; }
+    </style>
+  </head>
+  
+  <body>
+
+    <h1>Polygon geolocation demo</h1>
+
+    <p>You may input [lng,lat] coordinates here:</p>
+    <textarea id="myTextarea" disabled rows="4" cols="50" name="comment" form="usrform">[5.23279,60.57038],[5.23861,60.57031],[5.24419,60.57138],[5.24275,60.57396],[5.23605,60.57318]</textarea>
+
+    <div id="mapid"></div>
+
+    <p>Assume the polygon is small in relation to Earth, which is spherical.</p>
+    <p id="output1Distance"></p>
+    <p id="output2Perimeter"></p>
+    <p id="output3Area"></p>
+    <p id="output4CloseTo"></p>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+	    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+	    crossorigin=""></script>
+    <!--<script src="https://unpkg.com/mathjs@7.5.1/dist/math.js"></script>-->
+    <!--<script src="https://code.jquery.com/jquery-3.5.1.js"></script>-->
+    <script src="geopoly.js"></script>
+
+    
+    
+    <script>
+      let mymap = L.map('mapid').setView([60.5728, 5.2365], 15);
+
+      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+	  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+	  maxZoom: 18,
+	  id: 'mapbox/streets-v11',
+	  tileSize: 512,
+	  zoomOffset: -1,
+	  accessToken: 'pk.eyJ1Ijoiam9lbHNqb2dyZW4iLCJhIjoiY2tnNmFnd3JnMDA0bTJybjZidzUxaWIyNCJ9.p_L0C7GQWe4gog_wQf6OrA'
+      }).addTo(mymap);
+
+      let flip = (pos => [pos[1],pos[0]]);
+
+      let userpoint = [5.24000, 60.57100];
+      let radius = 350;  // in meters
+      let circle = L.circle(flip(userpoint), {
+	  color: 'black',
+	  fillColor: '#777',
+	  fillOpacity: 0.5,
+	  radius: radius
+      }).bindTooltip("circle of nearby points").addTo(mymap);
+      let circlem = L.circleMarker(flip(userpoint), {
+	  color: 'black',
+	  fillColor: '#777',
+	  fillOpacity: 0.5,
+	  radius: 5
+      }).addTo(mymap);
+
+      let input = document.getElementById("myTextarea").value;
+      let parsed = eval("[" + input + "]");
+      let processed = parsed.map(flip);  // to make compatible with leaflet
+      let polygon = L.polygon(processed).bindTooltip("original polygon").addTo(mymap);
+
+      //let processed2 = parsed.map(pos => [pos[1]+0.001,pos[0]+0.001]);
+      //let polygon2 = L.polygon(processed2, {color: 'red'}).bindTooltip(`test`).addTo(mymap);
+
+      let output1Distance = document.getElementById("output1Distance");
+      let output2Perimeter = document.getElementById("output2Perimeter");
+      let output3Area = document.getElementById("output3Area");
+      let output4CloseTo = document.getElementById("output4CloseTo");
+
+      for (let i = 0; i < processed.length; i++) {
+	  L.marker(processed[i]).bindTooltip(`index = ${i}`).addTo(mymap);
+      }
+
+      // TASK 1
+      let dists = "  ";
+      for (let i = 0; i < parsed.length; i++) {
+	  let j = (i+1) % parsed.length;
+	  dists += geopoly.distance(parsed[i], parsed[j]).toFixed(2) + "  ";
+      }
+      output1Distance.innerHTML = `1. The distance between successive points is:<b>${dists}m</b>.`
+
+      // TASK 2
+      output2Perimeter.innerHTML = "2. The outside/inside perimeters have <b>not yet been implemented</b>.";
+      output3Area.innerHTML = `3. The area of the polygon is <b>${geopoly.area(parsed).toFixed(2)} m<sup>2</sup></b>.`;
+      // TASK 4
+      let close = "  ";
+      for (let i = 0; i < parsed.length; i++) {
+	  if (geopoly.distance(parsed[i], userpoint) < radius) {
+	      close += i + "  "
+	  }
+      }
+      output4CloseTo.innerHTML = `4. The points<b>${close}</b>of the polygon are within ${radius} meters (black circle) from [${userpoint[0].toFixed(5)},${userpoint[1].toFixed(5)}].`;
+      
+    </script>
+
+  </body>
+</html>
+ 
