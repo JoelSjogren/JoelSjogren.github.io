@@ -14,7 +14,8 @@ h2 {
 }
 
 div.pieces {
-    
+    display: flex;
+    flex-wrap: wrap;
 }
 
 div.pieces div {
