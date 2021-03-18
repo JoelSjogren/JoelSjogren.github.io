@@ -7,9 +7,9 @@
 | Sketch of a 'type theoretic' notion of [functor differentiation](https://github.com/JoelSjogren/diff-functor/blob/master/DiffFunctor.agda), with a proof of the chain rule. | <img src="assets/fundiff.png" width="100%"> |
 
 ## Music projects
+
 | ------------- |:-------------:|
 | There is also some ['sheetmusic'](sheetmusic/index.html). | <img src="assets/sheetmusic.png" width="100%"> |
-| (Working on another project...) | |
 
 
 ## Web hacks
