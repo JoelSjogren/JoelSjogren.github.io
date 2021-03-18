@@ -9,6 +9,8 @@
 ## Music projects
 | ------------- |:-------------:|
 | There is also some ['sheetmusic'](sheetmusic/index.html). | <img src="assets/sheetmusic.png" width="100%"> |
+| (Working on another project...) | |
+
 
 ## Web hacks
  * a (special-purpose) **subtitle overlay** extension to Chrome ([link](https://github.com/JoelSjogren/most))
