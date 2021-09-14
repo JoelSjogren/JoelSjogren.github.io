@@ -112,6 +112,10 @@ var gsc = {
 	    - 'callchannel' can always be inlined
 	    - nested inlining never occurs
 	    - the current octave is a global variable
+
+	   The current implementation has a faulty implementation of octaves,
+           due to a simplistic approach to inlining and iteration. This is
+	   fixed by hard-coding the octave error in show.html - very dirty.
 	*/
 
 	var events = [];

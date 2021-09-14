@@ -257,7 +257,14 @@
 	  if (game.name == "Pokemon GSC" && chan == 2) {
 	      key -= 12;
 	  }
-	  
+
+	  if (game.name == "Pokemon GSC" && game.piece == "KantoGymBattle") {
+	      console.log(`time = ${t}`);
+	      const t0 = 48 * (8 + 7 + 7);
+	      if (t0 <= t && t <= t0 + 48 * (7 + 7) && chan == 1) {
+		  key += 12;
+	      }
+	  }
 
 	  layer = document.getElementById(`sheet-${chan}`);
 	  ctx = layer.getContext("2d");
