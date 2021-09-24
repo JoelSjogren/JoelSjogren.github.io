@@ -2,6 +2,7 @@ module Protocol exposing (..)
 
 import String exposing (indexes,length,slice,startsWith,toInt)
 import List exposing (head,sum,map,drop,filter,indexedMap,repeat)
+import Array exposing (Array)
 
 type alias Metadata =
   { title : String
@@ -22,7 +23,7 @@ type alias Channel =
 type alias Note =
   { duration : Int
   , what : Maybe DefiniteNote
---  , playedBefore : Bool
+  , playedBefore : Bool
   }
   
 type alias DefiniteNote =
@@ -41,7 +42,8 @@ totalDuration song =
   in
     if xs == ys
     then get 0 xs
-    else Debug.log (Debug.toString xs) (get 0 xs)       --Debug.todo ("the durations don't match! " ++ Debug.toString xs)
+--    else Debug.todo ("the durations don't match! " ++ Debug.toString xs)
+    else Debug.log (Debug.toString xs) (get 0 xs)
 
 totalDurations : Song -> (List (Int, Int))
 totalDurations { name, channels } =
@@ -171,3 +173,9 @@ get n la =
   let
     (head, tail) = headtail (drop n la)
   in head
+
+array_get : Int -> Array a -> a
+array_get n la =
+  case Array.get n la of
+    Nothing -> Debug.todo "array out of bounds"
+    Just a -> a

@@ -47,7 +47,9 @@ init _ =
 --      { url = "../data/gsc/audio/music/postcredits.asm"
 --      { url = "../data/gsc/audio/music/kantowildbattle.asm"
 --      { url = "../data/gsc/audio/music/kantogymbattle.asm"
-      { url = "../data/gsc/audio/music/johtogymbattle.asm"
+--      { url = "../data/gsc/audio/music/johtogymbattle.asm"
+--      { url = "../data/gsc/audio/music/goldenrodcity.asm"
+      { url = "../data/gsc/audio/music/goldsilveropening.asm"
       , expect = Http.expectString GotText
       }
   )
@@ -89,6 +91,7 @@ view model =
     Success fullText ->
       let
         song = (GSC.loadSong { name = "Pokémon GSC - KantoWildBattle"
+--        song = (GSC.loadSong { name = "Pokémon GSC - Goldenrod City"
                              , asm = fullText
                              })
         { name, channels } = song
@@ -250,7 +253,7 @@ drawBlock (notes, i) =
        
 
 drawNote : (Note, Int) -> (List (Svg msg), Int)
-drawNote ({ duration, what }, i) = case what of
+drawNote ({ duration, what, playedBefore }, i) = case what of
   Nothing -> ([], i + duration)
   Just { key, legato, strength } ->
     let
@@ -275,7 +278,7 @@ drawNote ({ duration, what }, i) = case what of
                        , y (fromInt i)
                        , width "1"
                        , height (fromInt duration)
-                       , fillOpacity "0.625"
+                       , fillOpacity (if playedBefore then "0.4" else "0.625")
                        , strokeWidth "0"
                        ] []
       gradient_def =

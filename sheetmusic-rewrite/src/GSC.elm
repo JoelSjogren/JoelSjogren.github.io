@@ -8,8 +8,9 @@ import Html exposing (Html, text, pre, h1, h2, div, img, hr)
 import Html.Attributes exposing (href, src, width)
 import List exposing (map,filter,indexedMap,drop,partition,take,drop,isEmpty,append,concat,repeat)
 import Tuple exposing (first,second)
+import Array exposing (Array)
 
-import Protocol exposing (Metadata,Song,Channel,Note,Key,keyToInt,parseKey,get,toInt_,headtail,index,transpose)
+import Protocol exposing (Metadata,Song,Channel,Note,Key,keyToInt,parseKey,get,toInt_,headtail,index,transpose,array_get)
 
 parseMetadata : String -> Metadata
 parseMetadata fullText =
@@ -61,18 +62,7 @@ filterDiff f xs = xs
 -- Load GSC midi data.
 --
 
-type alias AsmBlock = List String
-
-type alias StructuredAsmChannel =
-  { init : List AsmBlock
-  , loops : List AsmBlock  -- beware bad name: init may also contain loops
-  , subs : List AsmBlock
-  }
-
-type alias InlinedAsmChannel =
-  { boot : AsmBlock
-  , loop : AsmBlock
-  }
+type alias AsmChannel = List String
 
 loadSong : { name : String, asm : String } -> Song
 loadSong { name, asm } =
@@ -81,15 +71,26 @@ loadSong { name, asm } =
 
     channels =
       asmLines
-      |> listIndexes (\line -> startsWith "Music_" line && contains "_Ch" line && endsWith ":" line)
+      |> listIndexes (\line -> startsWith "Music_" line && slice -5 -2 line == "_Ch") --contains "_Ch" line && endsWith ":" line)
       |> intoBlocks asmLines
+      |> filter (listIndexes (contains "drum_note") >> isEmpty)
       |> map simulateChannel
       |> lowerCh3  -- (why?)
+      |> handleSongExceptions name
   in
     { name = name
     , channels = channels
     }
 
+handleSongExceptions : String -> List Channel -> List Channel
+handleSongExceptions name channels =
+  if name == "Pokémon GSC - Goldenrod City"
+  then case channels of
+    [ch1, ch2, ch3] ->
+      [ch1, { boot = [], loop = ch2.loop ++ take 22 ch2.loop }, { boot = [], loop = ch3.loop ++ take 34 ch3.loop }]
+    _ -> Debug.todo "goldenrodcity error"
+  else channels
+    
 lowerCh3 : List Channel -> List Channel
 lowerCh3 channels =
   case channels of
@@ -109,16 +110,25 @@ intoBlocks xs ix = case ix of
   [i] -> [drop i xs]
   [] -> Debug.todo "intoBlocks failed"
 
-simulateChannel : AsmBlock -> Channel
-simulateChannel asmLines =
-  let
-    { boot, loop } =
-      asmLines
-      |> listIndexes (\line -> not (startsWith "\t" line))
-      |> intoBlocks asmLines
-      |> makeStructuredAsm
-      |> makeInlinedAsm
+type alias MachineState =
+  -- note modifiers
+  { octave : Int
+  , transpose : Int
+  , timeUnit : Int
+  , strength : Int
+  , legato : Int
+  -- non-control metadata
+  , playedBefore : Array Bool
+  , introDone : Bool
+  -- control flow
+  , currentLine : Int
+  , loopCounter : Int
+  , returnTo : Int  -- (assuming stack is not needed)
+  }
 
+simulateChannel : AsmChannel -> Channel
+simulateChannel asmChannel =
+  let
     initialState : MachineState
     initialState =
       { octave = 0
@@ -126,103 +136,36 @@ simulateChannel asmLines =
       , timeUnit = 1
       , strength = 12
       , legato = 6
+      , playedBefore = Array.repeat (List.length asmChannel) False
+      , introDone = False
+      , currentLine = 0
+      , loopCounter = 0
+      , returnTo = -1
       }
-    
-    (boot_, newState) = boot |> executeBlock initialState
-    (loop_, endState) = loop |> executeBlock newState
-  in { boot = boot_, loop = loop_ }
+    emptyChannel : Channel
+    emptyChannel = { boot = [], loop = [] }
+  in
+    simulateWithState (asmChannel, initialState, emptyChannel)
 
-makeStructuredAsm : List AsmBlock -> StructuredAsmChannel
-makeStructuredAsm blocks =
+simulateWithState : (AsmChannel, MachineState, Channel) -> Channel
+simulateWithState (asmChannel, state, channel) =
   let
-    labelContains s = (\block -> contains s (get 0 block))
-    i = index (labelContains "mainloop") blocks
-    (init, rest) = (take i blocks, drop i blocks)
-    (loops, subs) = partition (labelContains "loop") rest
-  in { init = init, loops = loops, subs = subs }
-  
+    (note, state_, action) = step asmChannel state
+  in
+    case action of
+      Continue -> let
+                    channel_ =
+                      if not state_.introDone
+                      then { channel | boot = maybeSnoc note channel.boot }
+                      else { channel | loop = maybeSnoc note channel.loop }
+                  in
+                    simulateWithState (asmChannel, state_, channel_)
+      Halt -> channel
 
-makeInlinedAsm : StructuredAsmChannel -> InlinedAsmChannel
-makeInlinedAsm { init, loops, subs } =
-{-  let
-    boot = init
-    -- first inline .loopx, then inline .subx
-    loop_ = concat (map expand loops)
-    loop = inline loop_ subs
-  in { boot = boot, loop = loop }
--}
-  let
-    f u = inline (concat (map expand u)) subs
-  in { boot = f init, loop = f loops }
-
-expand : AsmBlock -> AsmBlock  -- playedBefore would be initialized here, once implemented
-expand block =
-    case listIndexes (contains "sound_loop") block of
-      [] -> block
-      i :: _ ->
-        let
-          (root, args) =
-            block
-            |> get i
-            |> parseInstruction
-          j = toInt_ (get 0 args)
-        in
-          if (j == 0)
-          then block
-          else append (concat (repeat j (take i block))) (drop i block)
---      u -> Debug.todo ("expand bug - too many sound loops " ++ String.fromInt (List.length u) ++ (Debug.toString block))
-
-inline : AsmBlock -> List AsmBlock -> AsmBlock
-inline block subs = case block of
-  x :: xs ->
-    let
-      (root, args) = parseInstruction x
-    in
-      if (root /= "sound_call")
-      then x :: inline xs subs
-      else let
-             l = String.length x
-             i = toInt_ (slice (l-1) l x)
-           in
-             append (get (i - 1) subs) (inline xs subs)
-  [] -> []
-
-{-
-type alias AsmBlock = List String
-
-type alias StructuredAsmChannel =
-  { init : AsmBlock
-  , loops : List AsmBlock
-  , subs : List AsmBlock
-  }
-
-type alias InlinedAsmChannel =
-  { boot : AsmBlock
-  , loop : AsmBlock
-  }
--}
-
-type alias MachineState =
-  { octave : Int
-  , transpose : Int
-  , timeUnit : Int
-  , strength : Int
-  , legato : Int
-  }
-
-executeBlock : MachineState -> AsmBlock -> (List Note, MachineState)
-executeBlock state block = case block of
-  [] -> ([], state)
-  (inst :: block_) ->
-    let
-      (note, state_) = interpret (inst, state)
-      (notes, finalState) = executeBlock state_ block_
-    in (maybeAppend note notes, finalState)
-
-maybeAppend : Maybe a -> List a -> List a
-maybeAppend ma la = case ma of
+maybeSnoc : Maybe a -> List a -> List a
+maybeSnoc ma la = case ma of
   Nothing -> la
-  Just a -> a :: la
+  Just a -> la ++ [a]
 
 parseInstruction : String -> (String, List String)
 parseInstruction s = s
@@ -230,81 +173,145 @@ parseInstruction s = s
   |> words
   |> headtail
 
---type alias Instruction =
---  { root : String
---  , args : List String
---  , playedBefore : Bool
---  }
+type MachineAction
+  = Continue
+  | Halt
 
-interpret : (String, MachineState) -> (Maybe Note, MachineState)
-interpret (inst, state) =
+step : AsmChannel -> MachineState -> (Maybe Note, MachineState, MachineAction)
+step asm state =
   let
-    (root, args) = parseInstruction inst
+    line = get state.currentLine asm
+    incr state_ = {state_ | playedBefore =
+                              Array.set state_.currentLine True state_.playedBefore
+                          , currentLine = state_.currentLine + 1 }
   in
-    case root of
-      "rest" ->
-        let
-          z = toInt_ (get 0 args)
-          w = state.timeUnit * z
-        in (Just { duration = w, what = Nothing }, state)
-      "octave" -> (Nothing, {state | octave = toInt_ (get 0 args)})
-        -- should one always lower the octave of Ch3 ? this is done later, far up above
-      "transpose" -> (Nothing, {state | transpose = 12*toInt_ (get 0 args) + toInt_ (get 1 args)})
-      "note" ->
-        let
-          x = keyToInt (parseKey (get 0 args))
-          { octave, transpose } = state
-          y = x + 12*octave + transpose
+    if line == "" || startsWith "." line || startsWith "Music_" line
+    then if line == ".mainloop:"
+         then (Nothing, { state | introDone = True } |> incr, Continue)
+         else (Nothing, state |> incr, Continue)
+    else
+      let
+        (root, args) = parseInstruction line
+      in
+        case root of
 
-          z = toInt_ (get 1 args)
-          w = state.timeUnit * z
-          
-          defNote = { key = y
-                    , strength = state.strength
-                    , legato = state.legato
-                    }
-        in
-          (Just { duration = w, what = Just defNote }, state)
-      "note_type" ->
-        let
-          timeUnit = toInt_ (get 0 args)
-          strength = toInt_ (get 1 args)
-          legato = toInt_ (get 2 args)
-        in
-          (Nothing, { state | timeUnit = timeUnit
-                            , strength = strength
-                            , legato = legato })  -- todo: handle case legato < 0
-      "volume_envelope" ->
-        let
-          strength = toInt_ (get 0 args)
-          legato = toInt_ (get 1 args)
-        in
-          (Nothing, { state | strength = strength
-                            , legato = legato })
-         
-      -- the following instructions are a bit unclear
-      --"pitch_offset" -> (Nothing, {state | transpose = toInt_ (get 0 args)})
-      -- microtonal ?
-      "pitch_offset" -> (Nothing, state)
-      -- the following instructions are ignored
-      "tempo" -> (Nothing, state)  -- might be used to set the vertical scale of the sheetmusic
-      "volume" -> (Nothing, state)
-      "duty_cycle" -> (Nothing, state)
-      "vibrato" -> (Nothing, state)
-      -- the following are handled elsewhere
-      "sound_call" -> (Nothing, state)
-      "sound_loop" -> (Nothing, state)
-      "sound_ret" -> (Nothing, state)
-      _ -> if startsWith "Music_" root
-           || startsWith ".mainloop" root
-           || startsWith ".loop" root
-           || startsWith ".sub" root
-           then (Nothing, state)
-           -- all other instructions are unknown
-           else Debug.todo ("unknown command: " ++ root)
+
+        -- control flow
+          "sound_call" ->
+            let
+              label = get 0 args
+            in
+              (Nothing, state |> jumpCall asm label |> incr, Continue)
+          "sound_ret" ->
+            if state.returnTo == -1
+            then (Nothing, state |> incr, Halt)  -- true termination
+            else (Nothing, state |> jumpReturn |> incr, Continue)
+          "sound_loop" ->
+            let
+              times = toInt_ (get 0 args)
+              label = get 1 args
+            in
+              if times == 0
+              then (Nothing, incr state, Halt)  -- looping rebranded as 'termination'
+              else case state.loopCounter of
+                0 -> (Nothing, state |> initializeLoop asm times label |> incr, Continue)
+                1 -> (Nothing, { state | loopCounter = 0 } |> incr, Continue)
+                _ -> (Nothing, state |> jumpLoop asm label |> incr, Continue)
 
 
 
+        -- modifiers
+          "note_type" ->
+            let
+              timeUnit = toInt_ (get 0 args)
+              strength = toInt_ (get 1 args)
+              legato = toInt_ (get 2 args)
+            in
+              (Nothing, { state | timeUnit = timeUnit
+                                , strength = strength
+                                , legato = legato } |> incr, Continue)  -- todo: handle case legato < 0
+          "volume_envelope" ->
+            let
+              strength = toInt_ (get 0 args)
+              legato = toInt_ (get 1 args)
+            in
+              (Nothing, { state | strength = strength
+                                , legato = legato } |> incr, Continue)
+          "octave" -> (Nothing, {state | octave = toInt_ (get 0 args)} |> incr, Continue)
+            -- should one always lower the octave of Ch3 ? this is done later, far up above.
+          "transpose" ->
+            let
+              octaves = toInt_ (get 0 args)
+              semitones = toInt_ (get 1 args)
+              transpose = 12*octaves + semitones
+            in
+              (Nothing, {state | transpose = transpose} |> incr, Continue)
 
 
 
+        -- actual sounds or silence
+          "rest" ->
+            let
+              z = toInt_ (get 0 args)
+              w = state.timeUnit * z
+              pb = array_get state.currentLine state.playedBefore
+            in (Just { duration = w
+                     , what = Nothing
+                     , playedBefore = pb }, state |> incr, Continue)
+          "note" ->
+            let
+              x = keyToInt (parseKey (get 0 args))
+              { octave, transpose } = state
+              y = x + 12*octave + transpose
+    
+              z = toInt_ (get 1 args)
+              w = state.timeUnit * z
+              
+              defNote = { key = y
+                        , strength = state.strength
+                        , legato = state.legato
+                        }
+              pb = array_get state.currentLine state.playedBefore
+            in
+              (Just { duration = w
+                    , what = Just defNote
+                    , playedBefore = pb }, state |> incr, Continue)
+
+
+
+        -- unused
+          "pitch_offset" -> (Nothing, state |> incr, Continue)  -- microtonal?
+          "tempo" -> (Nothing, state |> incr, Continue)  -- vertical scale of the sheetmusic?
+          "volume" -> (Nothing, state |> incr, Continue)  -- strength, todo
+          "duty_cycle" -> (Nothing, state |> incr, Continue)  -- some sort of sound texture
+          "vibrato" -> (Nothing, state |> incr, Continue)  -- maybe useful for violin
+          "toggle_noise" -> (Nothing, state |> incr, Continue)
+          "stereo_panning" -> (Nothing, state |> incr, Continue)
+
+
+        -- unrecognized
+          _ ->  Debug.todo ("unknown command: " ++ root)
+
+
+jumpCall : AsmChannel -> String -> MachineState -> MachineState
+jumpCall asm label state =
+  { state | returnTo = state.currentLine
+          , currentLine = lookupLabel label asm }
+
+jumpReturn : MachineState -> MachineState
+jumpReturn state =
+  { state | currentLine = state.returnTo
+          , returnTo = -1 }
+
+initializeLoop : AsmChannel -> Int -> String -> MachineState -> MachineState
+initializeLoop asm times label state =
+  { state | currentLine = lookupLabel label asm
+          , loopCounter = times - 1 }
+
+jumpLoop : AsmChannel -> String -> MachineState -> MachineState
+jumpLoop asm label state =
+  { state | currentLine = lookupLabel label asm
+          , loopCounter = state.loopCounter - 1}
+
+lookupLabel : String -> AsmChannel -> Int
+lookupLabel label = index (\line -> line == label ++ ":")
