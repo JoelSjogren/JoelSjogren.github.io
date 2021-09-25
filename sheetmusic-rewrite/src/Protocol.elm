@@ -13,6 +13,7 @@ type alias Metadata =
 type alias Song =
   { name : String
   , channels : List Channel
+  , measures : List Int
   }
 
 type alias Channel =
@@ -29,15 +30,15 @@ type alias Note =
 type alias DefiniteNote =
   { key : Int       -- typically between 0 and 100
   , legato : Int    -- <= 4 (esp. 1 or 2) means staccato; >= 7 means legato
-  , strength : Int  -- typically between 2 and 13
+  , strength : Int  -- typically between 2 and 13, with 6 being pretty silent and 10 being an accent
   }
   
 type Key = C0 | C1 | D0 | D1 | E0 | F0 | F1 | G0 | G1 | A0 | A1 | B0
 
-totalDuration : Song -> (Int, Int)
-totalDuration song =
+totalDuration : List Channel -> (Int, Int)
+totalDuration channels =
   let
-    xs = totalDurations song
+    xs = totalDurations channels
     ys = repeat (List.length xs) (get 0 xs)
   in
     if xs == ys
@@ -45,8 +46,8 @@ totalDuration song =
 --    else Debug.todo ("the durations don't match! " ++ Debug.toString xs)
     else Debug.log (Debug.toString xs) (get 0 xs)
 
-totalDurations : Song -> (List (Int, Int))
-totalDurations { name, channels } =
+totalDurations : List Channel -> (List (Int, Int))
+totalDurations channels =
   let
     duration_ { duration , what } = duration
     channelToIntInt { boot, loop } = (sum (map duration_ boot), sum (map duration_ loop))
@@ -179,3 +180,13 @@ array_get n la =
   case Array.get n la of
     Nothing -> Debug.todo "array out of bounds"
     Just a -> a
+
+cumsum : List Int -> List Int
+cumsum xs =
+  let
+    helper xs_ u =
+      case xs_ of
+        [] -> u :: []
+        (x :: xs__) -> u :: helper xs__ (x + u)
+  in
+    helper xs 0

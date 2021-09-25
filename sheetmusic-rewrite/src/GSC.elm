@@ -6,11 +6,11 @@ module GSC exposing (..)
 import String exposing (startsWith,slice,lines,dropLeft,endsWith,contains,toInt,words)
 import Html exposing (Html, text, pre, h1, h2, div, img, hr)
 import Html.Attributes exposing (href, src, width)
-import List exposing (map,filter,indexedMap,drop,partition,take,drop,isEmpty,append,concat,repeat)
+import List exposing (map,filter,indexedMap,drop,partition,take,drop,isEmpty,append,concat,repeat,range)
 import Tuple exposing (first,second)
 import Array exposing (Array)
 
-import Protocol exposing (Metadata,Song,Channel,Note,Key,keyToInt,parseKey,get,toInt_,headtail,index,transpose,array_get)
+import Protocol exposing (Metadata,Song,Channel,Note,Key,keyToInt,parseKey,get,toInt_,headtail,index,transpose,array_get,totalDuration,cumsum)
 
 parseMetadata : String -> Metadata
 parseMetadata fullText =
@@ -77,9 +77,16 @@ loadSong { name, asm } =
       |> map simulateChannel
       |> lowerCh3  -- (why?)
       |> handleSongExceptions name
+
+    (t0, t1) = totalDuration channels
+    measures =
+      if name == "Pokémon GSC - Opening Theme, Part 1"
+      then cumsum (repeat 24 4 ++ repeat 19 6 ++ repeat 8 4) |> map (\x -> x * 12)
+      else range 0 ((t0 + t1) // 48) |> map (\x -> x * 48 + modBy 48 -t0)
   in
     { name = name
     , channels = channels
+    , measures = measures
     }
 
 handleSongExceptions : String -> List Channel -> List Channel
