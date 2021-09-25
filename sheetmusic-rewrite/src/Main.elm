@@ -3,10 +3,11 @@ module Main exposing (..)
 -- List the available songs.
 --
 
-import Browser
-import Html exposing (Html, text, pre, h1, h2, div, img, hr)
-import Html.Attributes exposing (href, src, width)
+import Browser exposing (Document)
+import Html exposing (..)--(Html, text, pre, h1, h2, div, img, hr)
+import Html.Attributes exposing (..) --(href, src, width)
 import Http
+
 import List exposing (map,head)
 import String exposing (..)
 
@@ -18,7 +19,7 @@ import Protocol exposing (Metadata,removeHeader)
 
 
 main =
-  Browser.element
+  Browser.document --element
     { init = init
     , update = update
     , subscriptions = (\_ -> Sub.none)
@@ -68,21 +69,24 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Html Msg
-view {rby, gsc} = div [] [ h1 [] [ text "Assembly Sheet Music" ]
-                         , hr [] []
-                         , showMetadata rby
-                         , showMetadata gsc ]
+view : Model -> Document Msg --Html Msg
+view {rby, gsc} =
+  { title = "Sheetmusic"
+  , body = [-- h1 [] [ text "Assembly Sheet Music" ]
+             showMetadata gsc
+           , showMetadata rby
+           ]
+  }
 
 showMetadata : Maybe Metadata -> Html Msg
 showMetadata game =
   case game of
     Nothing -> div [] []
     Just { title, covers, songs } ->
-      div [] [ h2 [] [ text title ]
-             , div [] (List.map showCover covers)
-             , div [] (List.map showSong songs)
-             , hr [] []
+      div [] [-- h2 [] [ text title ]
+               div [] (List.map showCover covers)
+             , div [ class "pieces" ] (List.map showSong songs)
+--             , hr [] []
              ]
 
 showCover : String -> Html Msg

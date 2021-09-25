@@ -24,10 +24,13 @@ parseMetadata fullText =
 
 figureOutAuxiliaryFields : String -> {name : String, thumb : String, addr : String}
 figureOutAuxiliaryFields path =
-  { name = slice 12 -4 path
-  , thumb = "../data/gsc/thumb/" ++ slice 12 -4 path ++ ".png"
-  , addr = "../data/gsc/" ++ path
-  }
+  let
+    name = slice 12 -4 path
+  in
+    { name = name
+    , thumb = "../data/gsc/thumb/" ++ name ++ ".png"
+    , addr = "./Show.elm?" ++ path
+    }
 
 
 extractSongPaths : String -> List String

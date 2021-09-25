@@ -1,0 +1,36 @@
+body {
+/*    background-image: url("bg.png");
+    background-repeat: repeat;*/
+/*    margin: auto;
+    max-width: 500px;*/
+    text-align: center;
+}
+
+/*h1 {
+    color: #16c363;
+    text-shadow: 1px 1px #000000;
+}
+
+h2 {
+    color: #ff70a0;
+    text-shadow: 1px 1px #000000;
+}*/
+
+div.pieces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+div.pieces div {
+    width: 160px;
+    height: 200px;
+    float: left;
+    margin: 4px;
+    background: #eeeeee;
+}
+
+div.pieces img {
+    width: 160px;
+    height: 144px;
+}

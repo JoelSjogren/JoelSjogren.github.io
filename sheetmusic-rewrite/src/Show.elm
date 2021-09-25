@@ -151,12 +151,15 @@ view model =
 --        center = [ Html.Attributes.style "display" "flex"
 --                 , Html.Attributes.style "justify-content" "center"
 --                 ]
-      in
-        div [
-            ]
+          debugInfo = div []
             [ pre [] (Debug.log(Debug.toString song) [])
             , pre [] [ Html.text (Debug.toString (totalDurations channels)) ]
             , pre [] [ Html.text (Debug.toString name) ]
+            ]
+      in
+        div [
+            ]
+            [ debugInfo
             , pianoHTML
             , sheetHTML
             ]
