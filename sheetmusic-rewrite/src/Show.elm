@@ -9,6 +9,7 @@ import Html.Attributes exposing (href, src, style)
 import Http
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Url
 
 import List exposing (map,head,concatMap,take,drop,indexedMap)
 import String exposing (..)
@@ -37,12 +38,12 @@ main =
 
 type Model
   = Failure
-  | Loading
-  | Success String
+  | Loading { url : String }
+  | Success { url : String, fullText : String }
 
-init : () -> (Model, Cmd Msg)
-init _ =
-  ( Loading
+init : { url : String } -> (Model, Cmd Msg)
+init { url } =
+  ( Loading { url = url }
   , Http.get
 --      { url = "../data/gsc/audio/music/postcredits.asm"
 --      { url = "../data/gsc/audio/music/kantowildbattle.asm"
@@ -54,7 +55,8 @@ init _ =
 --      { url = "../data/gsc/audio/music/titlescreen.asm"
 --      { url = "../data/gsc/audio/music/mainmenu.asm"
 --      { url = "../data/gsc/audio/music/pallettown.asm"
-      { url = "../data/gsc/audio/music/azaleatown.asm"
+--      { url = "../data/gsc/audio/music/azaleatown.asm"
+      { url = Debug.log "url" (url |> split "?" |> get 1)
       , expect = Http.expectString GotText
       }
   )
@@ -70,15 +72,14 @@ type Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    GotText result ->
+  case (msg, model) of
+    (GotText result, Loading { url }) ->
       case result of
         Ok fullText ->
-          (Success (removeHeader fullText), Cmd.none)
-
+          (Success { url = url, fullText = (removeHeader fullText) }, Cmd.none)
         Err _ ->
           (Failure, Cmd.none)
-
+    _ -> Debug.todo "update error"
 
 
 -- VIEW
@@ -90,12 +91,12 @@ view model =
     Failure ->
       Html.text "I was unable to load your book."
 
-    Loading ->
+    Loading _ ->
       Html.text "Loading..."
 
-    Success fullText ->
+    Success { url, fullText } ->
       let
-        song = (GSC.loadSong { name = "Pokémon GSC - KantoWildBattle"
+        song = (GSC.loadSong { name = (url |> split "?" |> get 1)
 --        song = (GSC.loadSong { name = "Pokémon GSC - Goldenrod City"
 --        song = (GSC.loadSong { name = "Pokémon GSC - Opening Theme, Part 1"
                              , asm = fullText
@@ -151,16 +152,17 @@ view model =
 --        center = [ Html.Attributes.style "display" "flex"
 --                 , Html.Attributes.style "justify-content" "center"
 --                 ]
-          debugInfo = div []
-            [ pre [] (Debug.log(Debug.toString song) [])
-            , pre [] [ Html.text (Debug.toString (totalDurations channels)) ]
-            , pre [] [ Html.text (Debug.toString name) ]
-            ]
+        debugInfo = div []
+          [ --pre [] (Debug.log(Debug.toString song) [])
+            pre [] (Debug.log(Debug.toString (totalDurations channels)) [])
+          , pre [] [ Html.text (Debug.toString (totalDurations channels)) ]
+          , pre [] [ Html.text (Debug.toString name) ]
+          ]
       in
         div [
             ]
-            [ debugInfo
-            , pianoHTML
+            [ -- debugInfo
+              pianoHTML
             , sheetHTML
             ]
 

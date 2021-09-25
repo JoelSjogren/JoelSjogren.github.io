@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="index-style.css">
+    <script src="show.js"></script>
+  </head>
+  <body>
+    <main></main>
+    <script>
+      var app = Elm.Show.init({ node: document.querySelector('main'),
+                                flags : {url: window.location.href }  });
+    </script>
+  </body>
+</html> 

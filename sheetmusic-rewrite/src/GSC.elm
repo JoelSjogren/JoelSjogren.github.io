@@ -29,7 +29,7 @@ figureOutAuxiliaryFields path =
   in
     { name = name
     , thumb = "../data/gsc/thumb/" ++ name ++ ".png"
-    , addr = "./Show.elm?" ++ path
+    , addr = "./show.html?/data/gsc/" ++ path
     }
 
 
@@ -83,7 +83,7 @@ loadSong { name, asm } =
 
     (t0, t1) = totalDuration channels
     measures =
-      if name == "Pokémon GSC - Opening Theme, Part 1"
+      if name == "/data/gsc/audio/music/goldsilveropening.asm"
       then cumsum (repeat 24 4 ++ repeat 19 6 ++ repeat 8 4) |> map (\x -> x * 12)
       else range 0 ((t0 + t1) // 48) |> map (\x -> x * 48 + modBy 48 -t0)
   in
@@ -94,7 +94,7 @@ loadSong { name, asm } =
 
 handleSongExceptions : String -> List Channel -> List Channel
 handleSongExceptions name channels =
-  if name == "Pokémon GSC - Goldenrod City"
+  if name == "/data/gsc/audio/music/goldenrodcity.asm"
   then case channels of
     [ch1, ch2, ch3] ->
       [ch1, { boot = [], loop = ch2.loop ++ take 22 ch2.loop }, { boot = [], loop = ch3.loop ++ take 34 ch3.loop }]

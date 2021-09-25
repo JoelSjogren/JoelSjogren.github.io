@@ -19,11 +19,13 @@ import Protocol exposing (Metadata,removeHeader)
 
 
 main =
-  Browser.document --element
+  Browser.document --application --document --element
     { init = init
+    , view = view
     , update = update
     , subscriptions = (\_ -> Sub.none)
-    , view = view
+--    , onUrlChange = UrlChanged
+--    , onrlRequest = LinkClicked
     }
 
 
