@@ -1,0 +1,73 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+          "imports": {
+              "three": "https://unpkg.com/three@0.143.0/build/three.module.js"
+          }
+      }
+    </script>
+    <script type="module">
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const objpath = urlParams.get('obj');
+      const texpath = urlParams.get('tex');
+      console.log(objpath);
+      console.log(texpath);
+      
+      import * as THREE from 'three';
+
+      let camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.001, 100 );
+      camera.position.z = 4;
+      let scene = new THREE.Scene();
+
+      const texture = new THREE.TextureLoader().load( texpath );
+      const material = new THREE.MeshBasicMaterial( { map: texture } );
+      material.side = THREE.DoubleSide;
+      import { OBJLoader } from "https://unpkg.com/three@0.143.0/examples/jsm/loaders/OBJLoader.js";
+      var loader = new OBJLoader();
+      loader.load( objpath, function ( object ) {
+          object.traverse( function ( node ) {
+              if ( node.isMesh ) {
+                  node.material = material;
+              }
+          } );
+          scene.add( object );
+      } );
+
+      let renderer = new THREE.WebGLRenderer( { antialias: true } );
+      renderer.setPixelRatio( window.devicePixelRatio );
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.body.appendChild( renderer.domElement );
+      
+      window.addEventListener( 'resize', onWindowResize, false );
+      
+      import { TrackballControls } from "https://unpkg.com/three@0.143.0/examples/jsm/controls/TrackballControls.js";
+      const controls = new TrackballControls(camera, renderer.domElement);
+
+      renderer.setClearColor(0x889900);
+
+      animate();
+
+      
+
+      function onWindowResize() {
+
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+
+          renderer.setSize( window.innerWidth, window.innerHeight );
+
+      }
+      
+      function animate() {
+          requestAnimationFrame( animate );
+          controls.update();
+          renderer.render( scene, camera );
+
+      }
+    </script>
+  </body>
+</html>
