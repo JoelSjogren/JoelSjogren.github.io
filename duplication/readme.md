@@ -13,3 +13,9 @@ The following 3d models provide a more zoomed-out, global view of the surface be
 [3d model after rewrite](viewer.html?obj=242-textured.obj&tex=242-textured.png)
 
 Some coloring has been added to the surface as decoration, amounting to a sort of string diagram embedded in the surface. The rewrite (including the decoration) can be said to take place in a suitable 4-category.
+
+To introduce some asymmetry into these models and make it easier to refer to their parts, here is another picture of the initial state before the rewrite:
+
+![color coded](212-colorcoded.png)
+
+You may for instance imagine that the "red pair of pants" represents composition or the formation of pairs of data, while the "blue pair of pants" represents the duplication of such a pair.
