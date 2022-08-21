@@ -2,23 +2,16 @@
   <head>
   </head>
   <body>
-    <script type="importmap">
-      {
-          "imports": {
-              "three": "https://unpkg.com/three@0.143.0/build/three.module.js"
-          }
-      }
-    </script>
-    <script type="module">
+    <script type="module"></script>
+    <script src="https://unpkg.com/three@0.143.0/build/three.js"></script>
+    <script src="https://unpkg.com/three@0.143.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://unpkg.com/three@0.143.0/examples/js/controls/TrackballControls.js"></script>
+    <script>
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       const objpath = urlParams.get('obj');
       const texpath = urlParams.get('tex');
-      console.log(objpath);
-      console.log(texpath);
       
-      import * as THREE from 'three';
-
       let camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.001, 100 );
       camera.position.z = 4;
       let scene = new THREE.Scene();
@@ -26,8 +19,7 @@
       const texture = new THREE.TextureLoader().load( texpath );
       const material = new THREE.MeshBasicMaterial( { map: texture } );
       material.side = THREE.DoubleSide;
-      import { OBJLoader } from "https://unpkg.com/three@0.143.0/examples/jsm/loaders/OBJLoader.js";
-      var loader = new OBJLoader();
+      var loader = new THREE.OBJLoader();
       loader.load( objpath, function ( object ) {
           object.traverse( function ( node ) {
               if ( node.isMesh ) {
@@ -44,8 +36,7 @@
       
       window.addEventListener( 'resize', onWindowResize, false );
       
-      import { TrackballControls } from "https://unpkg.com/three@0.143.0/examples/jsm/controls/TrackballControls.js";
-      const controls = new TrackballControls(camera, renderer.domElement);
+      const controls = new THREE.TrackballControls(camera, renderer.domElement);
 
       renderer.setClearColor(0x889900);
 
