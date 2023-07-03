@@ -19,3 +19,5 @@ To introduce some asymmetry into these models and make it easier to refer to the
 ![color coded](212-colorcoded.png)
 
 You may for instance imagine that the "red pair of pants" represents composition or the formation of a pair of data from its components, while the "blue pair of pants" represents the duplication of such a pair.
+
+Update: Essentially the same representation has been found at https://www.pnas.org/doi/10.1073/pnas.1621345114 (search for "COPY" and note in particular the justification for equation [21]).
