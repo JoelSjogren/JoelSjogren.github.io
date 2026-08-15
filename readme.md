@@ -6,6 +6,9 @@
 | I used to have a [math blog](http://geq-i.blogspot.com/). | <img src="assets/blog.png" width="100%"> |
 | Sketch of a 'type theoretic' notion of [functor differentiation](https://github.com/JoelSjogren/diff-functor/blob/master/DiffFunctor.agda), with a proof of the chain rule. | <img src="assets/fundiff.png" width="100%"> |
 
+## Vibecoding
+ * a [Delaunay / circumcircle playground](vibecoding/delaunay/) — pan, zoom, drag points and segments, live circumcircle heatmap; source in the [mesh-voronoi](https://github.com/JoelSjogren/mesh-voronoi/tree/master/delaunay) repo
+
 ## Music projects
 
 | ------------- |:-------------:|
