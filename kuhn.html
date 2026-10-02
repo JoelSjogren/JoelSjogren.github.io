@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kuhn Meshes</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1d1d1b; --muted: #6b6a66; --rule: #e3e0d8; --panel: #f3f1ec;
+    --accent: #3b5bdb; --code-bg: #f0eee8;
+    --c0: #e8590c; --c1: #2f9e44; --c2: #1c7ed6; --c3: #ae3ec9; --c4: #f08c00; --c5: #0c8599;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614; --fg: #e9e7e1; --muted: #a09e97; --rule: #33322e; --panel: #1f1f1c;
+      --accent: #8ea6ff; --code-bg: #24241f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161614; --fg: #e9e7e1; --muted: #a09e97; --rule: #33322e; --panel: #1f1f1c;
+    --accent: #8ea6ff; --code-bg: #24241f; color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); margin: 0;
+         font: 16px/1.6 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  main { max-width: 46rem; margin: 0 auto; padding-inline: 1.25rem; padding-block: 3rem 5rem; }
+  h3 { font-size: 1.05rem; margin: 2rem 0 .4rem; }
+  h1 { font-size: 2.2rem; line-height: 1.15; margin: 0 0 .4rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.3rem; margin: 2.8rem 0 .6rem; border-top: 1px solid var(--rule); padding-top: 1.4rem; }
+  .disclaimer { font: 13px/1.4 system-ui, sans-serif; color: var(--muted); border: 1px dashed var(--rule);
+                border-radius: 6px; padding: .45rem .7rem; margin: 0 0 1.6rem; }
+  .lede { color: var(--muted); font-size: 1.08rem; margin: 0 0 2rem; }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .86em; }
+  code { background: var(--code-bg); padding: .08em .3em; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: .9rem 1rem; border-radius: 6px; overflow-x: auto; line-height: 1.45; }
+  pre code { background: none; padding: 0; }
+  .math { font-style: italic; white-space: nowrap; }
+  figure { margin: 1.6rem 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem; }
+  figcaption { color: var(--muted); font-size: .9rem; margin-top: .6rem; }
+  canvas { width: 100%; aspect-ratio: 4 / 3; display: block; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  .controls { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; align-items: center; margin-top: .6rem;
+              font: 14px/1.3 system-ui, sans-serif; color: var(--muted); }
+  .controls input[type=range] { width: 9rem; accent-color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .chip { font: 13px/1 ui-monospace, Menlo, monospace; border: 1px solid var(--rule); background: var(--bg);
+          color: var(--fg); padding: .35rem .5rem; border-radius: 999px; cursor: pointer; }
+  .chip[aria-pressed=true] { border-color: var(--accent); color: var(--accent); }
+  .chip i { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; vertical-align: -.02rem; }
+  table { border-collapse: collapse; font-size: .92rem; }
+  td, th { padding: .3rem .8rem .3rem 0; text-align: left; border-bottom: 1px solid var(--rule); }
+  .wrap { overflow-x: auto; }
+  .order-row { margin: .4rem 0 1rem; }
+  .order-row h3 { font: 600 14px/1.3 system-ui, sans-serif; margin: 0 0 .4rem; color: var(--fg); }
+  .frames { display: grid; grid-template-columns: repeat(9, 1fr); gap: .4rem; }
+  @media (max-width: 34rem) { .frames { grid-template-columns: repeat(5, 1fr); } }
+  .frame { font: 12px/1.2 system-ui, sans-serif; color: var(--muted); text-align: center; }
+  .frame svg { width: 100%; aspect-ratio: 1; display: block; background: var(--bg);
+               border: 1px solid var(--rule); border-radius: 4px; }
+  .frame.final svg { border: 2px solid var(--accent); }
+  .note { border-left: 3px solid var(--accent); padding: .2rem 0 .2rem 1rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<p class="disclaimer">This documentation was vibe coded, not written by me.</p>
+<h1>Kuhn meshes</h1>
+<p class="lede">How a cube is cut into tetrahedra, why the pieces fit together, and how
+bisection refines them without ever breaking that fit.</p>
+
+<h2>1. Sorting the coordinates</h2>
+<p>Take the unit cube and a point <span class="math">u = (u₀, u₁, u₂)</span> in it. Sort the three
+coordinates from largest to smallest. There are 3! = 6 possible orders, and each order is a
+tetrahedron:</p>
+<p style="text-align:center"><span class="math">T<sub>σ</sub> = { u : 1 ≥ u<sub>σ0</sub> ≥ u<sub>σ1</sub> ≥ u<sub>σ2</sub> ≥ 0 }</span></p>
+<p>Its corners are found by walking from <span class="math">(0,0,0)</span> to <span class="math">(1,1,1)</span>
+along cube edges, stepping first in direction <span class="math">σ0</span>, then
+<span class="math">σ1</span>, then <span class="math">σ2</span>:</p>
+<p style="text-align:center"><span class="math">x₀ = 0, &nbsp; x₁ = e<sub>σ0</sub>, &nbsp; x₂ = e<sub>σ0</sub> + e<sub>σ1</sub>, &nbsp; x₃ = (1,1,1)</span></p>
+<p>The six orders tile the cube exactly: every point has a (generically unique) sorted order, and
+points where two coordinates tie lie on a shared face. All six tetrahedra share the main diagonal
+<span class="math">x₀x₃</span>, and each has volume 1/6.</p>
+
+<figure>
+  <canvas id="cube" width="800" height="600" aria-label="The unit cube split into six Kuhn tetrahedra"></canvas>
+  <div class="controls">
+    <label>explode <input id="explode" type="range" min="0" max="100" value="35"></label>
+    <div class="chips" id="chips"></div>
+  </div>
+  <figcaption>The Kuhn (Freudenthal) triangulation of one cube. Drag to rotate. Each tetrahedron is
+  labelled by its step order σ; the dark line is the shared diagonal from (0,0,0) to (1,1,1).</figcaption>
+</figure>
+
+<h2>2. Locating a point is a sort</h2>
+<p>To find which tetrahedron of an <span class="math">n×n×n</span> grid contains a point
+<span class="math">x</span>, take the cell <span class="math">c = ⌊n x⌋</span> and the local coordinates
+<span class="math">u = n x − c</span>, then sort <span class="math">u</span>. The sorted values also
+give the barycentric coordinates directly, with no linear solve:</p>
+<pre><code>λ = ( 1 − u[σ0],  u[σ0] − u[σ1],  u[σ1] − u[σ2],  u[σ2] )   # weights of x0, x1, x2, x3</code></pre>
+<p>Vectorized over many points, this is one <code>argsort</code>, a lookup of the permutation, and four
+subtractions per point.</p>
+
+<h2>3. Why neighbouring cells fit together</h2>
+<p>A triangulation is <em>conforming</em> when two tetrahedra meet in a full shared face, edge or
+vertex, or not at all; there are no hanging vertices or partly overlapping faces. P1 finite elements
+need this so the piecewise-linear map is continuous.</p>
+<p>In the Kuhn triangulation every face lies on a plane of the form <span class="math">x<sub>i</sub> = k/n</span>
+or <span class="math">x<sub>i</sub> − x<sub>j</sub> = k/n</span>. Every cell uses the same orientation, so on a
+shared square face both neighbours cut along the same diagonal (the one parallel to
+<span class="math">e<sub>i</sub> + e<sub>j</sub></span>). The two sides match automatically.</p>
+<p class="note">The same plane argument shows that the Kuhn mesh at <span class="math">2n</span> refines the
+one at <span class="math">n</span>: within a fine cell each <span class="math">u<sub>i</sub> − u<sub>j</sub></span>
+has a fixed sign, so a fine tetrahedron never straddles a coarse plane. The meshes are <em>nested</em>.</p>
+
+<h2>4. Refining by bisection</h2>
+<p>For adaptive refinement we cut one tetrahedron at a time instead of a whole grid. Maubach's
+bisection rule keeps everything consistent. Each tetrahedron carries its vertex order
+<span class="math">(x₀, x₁, x₂, x₃)</span> and a tag <span class="math">k ∈ {1,2,3}</span>. Kuhn tets start with
+<span class="math">k = 3</span>.</p>
+<ol>
+  <li>The refinement edge is <span class="math">x₀x<sub>k</sub></span>, and <span class="math">z</span> is its midpoint.</li>
+  <li>The children are
+    <span class="math">(x₀, …, x<sub>k−1</sub>, z, x<sub>k+1</sub>, …)</span> and
+    <span class="math">(x₁, …, x<sub>k</sub>, z, x<sub>k+1</sub>, …)</span>.</li>
+  <li>Both children get tag <span class="math">k − 1</span>, or 3 when <span class="math">k = 1</span>.</li>
+</ol>
+<p>The first cut splits the main diagonal. Three generations later, each Kuhn tetrahedron has become 8
+tetrahedra of half the size that are again Kuhn path-simplices. They are <em>reflected</em>: in each
+half-size subcell the path runs from whichever corner the reflection dictates, not always from the
+lower-left one. The pattern then repeats, every 3 generations, forever.</p>
+
+<figure>
+  <canvas id="bisect" width="800" height="600" aria-label="Maubach bisection of the cube, generation by generation"></canvas>
+  <div class="controls">
+    <label>generation <input id="gen" type="range" min="0" max="6" value="0"> <b id="genv">0</b></label>
+    <label>explode <input id="explode2" type="range" min="0" max="100" value="30"></label>
+    <span id="gencount"></span>
+  </div>
+  <figcaption>Bisection of all six Kuhn tetrahedra of one cube. Colour shows which root tetrahedron a
+  piece came from. At generations 3 and 6 the pieces are reflected Kuhn simplices of half and quarter
+  size.</figcaption>
+</figure>
+
+<h3>Shapes of the pieces</h3>
+<p>Not every piece has the original shape, but only three shapes ever occur. Every generation consists
+of a single shape, and the shapes cycle with period 3 (counted up to rotation, reflection and scaling).
+With <span class="math">h</span> the side of the original cube, and generation
+<span class="math">g + 3</span> always being generation <span class="math">g</span> at half the size:</p>
+<div class="wrap"><table>
+  <tr><th>Generation</th><th>Edge lengths (at generation 0, 1, 2)</th><th>Unique longest edge</th></tr>
+  <tr><td>0, 3, 6, …</td><td><span class="math">h, h, h, √2 h, √2 h, √3 h</span></td><td><span class="math">√3 h</span>, a cube diagonal</td></tr>
+  <tr><td>1, 4, 7, …</td><td><span class="math">½√3 h ×3, h ×2, √2 h</span></td><td><span class="math">√2 h</span>, a face diagonal</td></tr>
+  <tr><td>2, 5, 8, …</td><td><span class="math">½ h, ½√2 h ×2, ½√3 h ×2, h</span></td><td><span class="math">h</span>, a cube edge</td></tr>
+</table></div>
+<ul>
+  <li><strong>Same shape as the original?</strong> Only every third generation. Generations
+  <span class="math">3k</span> are exact copies of the original Kuhn tetrahedron scaled by
+  2<sup>−k</sup>. The two generations in between have the other two shapes.</li>
+  <li><strong>Unique longest edge?</strong> Always. Moreover the refinement edge
+  <span class="math">x₀x<sub>k</sub></span> is always that longest edge, so on Kuhn meshes Maubach's rule is
+  the same as longest-edge bisection.</li>
+  <li><strong>No degeneration.</strong> With only three shapes, angles stay bounded away from 0 and π
+  however deep the refinement goes. Each bisection halves the volume.</li>
+</ul>
+<p>All of this was checked exactly, with rational arithmetic, for generations 0–9 of all six Kuhn
+tetrahedra. Shapes were compared through their full distance matrices over all 24 vertex relabellings.</p>
+
+<p><strong>Local refinement and closure.</strong> When only some tetrahedra are bisected, a neighbour that
+shares the cut edge now has a midpoint sitting in the middle of one of its edges (a hanging vertex).
+The fix is a closure loop: keep bisecting every leaf that has a midpoint on one of its edges until none
+is left. For meshes that start from a consistently tagged Kuhn grid this loop always terminates, and the
+result is conforming again.</p>
+<p><strong>Does the order of bisections matter?</strong> No. A tetrahedron's children depend only on
+that tetrahedron (its vertex order and tag), not on when it is cut. So every mesh we can ever produce
+is a set of leaves of one fixed binary tree per root. The closure loop cuts a leaf only when a
+midpoint already sits on one of its edges, and every conforming mesh containing the requested cuts must
+make that cut too. The result is therefore always the <em>unique coarsest conforming mesh</em>
+containing the requested bisections, whatever order they were made in.</p>
+
+<figure>
+  <div id="order2d"></div>
+  <div class="controls" id="order2dverdict"></div>
+  <figcaption>The same in 2D, computed live with the same rules on a 2×2 Kuhn grid (each square cut
+  along its diagonal; tag 2, then 1, then 2, …). Two neighbouring requests in the same lower-left
+  triangle, <b style="color:var(--c0)">A</b> (one of its children) and <b style="color:var(--c2)">B</b>
+  (a grandchild right next to A), are made in both orders. Their closure cascades overlap: when B goes
+  first, its closure already performs A's cuts. Each picture is one bisection: <span style="color:var(--c0)">orange</span> = cut
+  requested by A, <span style="color:var(--c2)">blue</span> = requested by B,
+  <span style="color:var(--muted)">grey</span> = forced by closure. Red dots are hanging midpoints that
+  still force a cut.</figcaption>
+</figure>
+
+</main>
+
+<script>
+(() => {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const palette = () => [0,1,2,3,4,5].map(i => css('--c' + i));
+  const PERMS = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+
+  function kuhnTets() {
+    return PERMS.map((p, i) => {
+      const v = [[0,0,0]];
+      for (const a of p) { const w = v[v.length - 1].slice(); w[a] += 1; v.push(w); }
+      return { v, tag: 3, root: i };
+    });
+  }
+  function bisect(t) {
+    const k = t.tag, x = t.v;
+    const z = x[0].map((c, i) => (c + x[k][i]) / 2);
+    const a = x.slice(); a[k] = z;
+    const b = [...x.slice(1, k + 1), z, ...x.slice(k + 1)];
+    const tag = k > 1 ? k - 1 : 3;
+    return [{ v: a, tag, root: t.root }, { v: b, tag, root: t.root }];
+  }
+
+  // A tiny painter's-algorithm renderer with drag rotation.
+  function viewer(canvas, getTets, getExplode, getHighlight) {
+    const ctx = canvas.getContext('2d');
+    let yaw = -0.7, pitch = 0.45, drag = null;
+    const rot = p => {
+      const [x, y, z] = [p[0] - .5, p[1] - .5, p[2] - .5];
+      const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      const x1 = cy * x + sy * y, y1 = -sy * x + cy * y;
+      return [x1, cp * z - sp * y1, sp * z + cp * y1];   // screen x, screen y (up), depth
+    };
+    function draw() {
+      const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      const s = Math.min(w, h) * 0.52, cx = w / 2, cy = h / 2;
+      const proj = q => [cx + s * q[0], cy - s * q[1]];
+      const tets = getTets(), ex = getExplode(), hl = getHighlight(), cols = palette();
+      const faces = [];
+      for (const t of tets) {
+        const c = [0,1,2].map(i => t.v.reduce((s, v) => s + v[i], 0) / 4);
+        const off = c.map(ci => (ci - .5) * ex);
+        const pts = t.v.map(v => rot(v.map((vi, i) => vi + off[i])));
+        for (const f of [[0,1,2],[0,1,3],[0,2,3],[1,2,3]]) {
+          const q = f.map(i => pts[i]);
+          faces.push({ q, depth: (q[0][2] + q[1][2] + q[2][2]) / 3, color: cols[t.root % 6],
+                       dim: hl !== null && hl !== t.root });
+        }
+      }
+      faces.sort((a, b) => a.depth - b.depth);
+      for (const f of faces) {
+        ctx.beginPath();
+        f.q.forEach((p, i) => { const [x, y] = proj(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+        ctx.closePath();
+        ctx.globalAlpha = f.dim ? 0.07 : 0.5;
+        ctx.fillStyle = f.color; ctx.fill();
+        ctx.globalAlpha = f.dim ? 0.15 : 0.9;
+        ctx.strokeStyle = css('--fg'); ctx.lineWidth = 0.7; ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      if (ex < 0.02) {   // main diagonal (only meaningful when assembled)
+        const [a, b] = [proj(rot([0,0,0])), proj(rot([1,1,1]))];
+        ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b);
+        ctx.strokeStyle = css('--fg'); ctx.lineWidth = 2.2; ctx.stroke();
+      }
+    }
+    canvas.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      yaw += (e.clientX - drag[0]) * 0.01; pitch += (e.clientY - drag[1]) * 0.01;
+      pitch = Math.max(-1.5, Math.min(1.5, pitch)); drag = [e.clientX, e.clientY]; draw();
+    });
+    canvas.addEventListener('pointerup', () => drag = null);
+    new ResizeObserver(draw).observe(canvas);
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+    new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return draw;
+  }
+
+  // Figure 1: one cube, six tets.
+  const base = kuhnTets();
+  let highlight = null;
+  const explode = document.getElementById('explode');
+  const draw1 = viewer(document.getElementById('cube'), () => base, () => explode.value / 100 * 0.9, () => highlight);
+  explode.addEventListener('input', draw1);
+  const chips = document.getElementById('chips');
+  PERMS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = `<i style="background:var(--c${i})"></i>σ = (${p.join(',')})`;
+    b.addEventListener('click', () => {
+      highlight = highlight === i ? null : i;
+      chips.querySelectorAll('.chip').forEach((c, j) => c.setAttribute('aria-pressed', String(highlight === j)));
+      draw1();
+    });
+    chips.appendChild(b);
+  });
+
+  // Figure 2: generations of Maubach bisection.
+  const gens = [base];
+  for (let g = 1; g <= 6; g++) gens.push(gens[g - 1].flatMap(bisect));
+  const gen = document.getElementById('gen'), genv = document.getElementById('genv'),
+        explode2 = document.getElementById('explode2'), gencount = document.getElementById('gencount');
+  const draw2 = viewer(document.getElementById('bisect'), () => gens[+gen.value],
+                       () => explode2.value / 100 * 0.9, () => null);
+  const update = () => {
+    genv.textContent = gen.value;
+    const n = gens[+gen.value].length;
+    gencount.textContent = `${n} tetrahedra` + (+gen.value % 3 === 0 && +gen.value > 0 ? ' · reflected Kuhn mesh' : '');
+    draw2();
+  };
+  gen.addEventListener('input', update); explode2.addEventListener('input', draw2); update();
+
+  // Figure 3: 2D bisection with closure, two request orders, same final mesh.
+  (() => {
+    const N = 2, roots = [];
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++)
+      for (const p of [[0,1],[1,0]]) {
+        const x0 = [i, j], x1 = x0.slice(); x1[p[0]]++;
+        roots.push({ v: [x0, x1, [i + 1, j + 1]], tag: 2 });
+      }
+    const key = t => JSON.stringify([t.v, t.tag]);
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const children = t => {
+      const k = t.tag, x = t.v, z = mid(x[0], x[k]);
+      const a = x.slice(); a[k] = z;
+      const b = [...x.slice(1, k + 1), z, ...x.slice(k + 1)];
+      const tag = k > 1 ? k - 1 : 2;
+      return [{ v: a, tag }, { v: b, tag }];
+    };
+    const hanging = leaves => {
+      const V = new Set(leaves.flatMap(t => t.v.map(v => v.join())));
+      const out = [], lv = [];
+      for (const t of leaves)
+        for (const [a, b] of [[0,1],[0,2],[1,2]]) {
+          const m = mid(t.v[a], t.v[b]);
+          if (V.has(m.join())) { out.push(m); lv.push(t); }
+        }
+      return { points: out, leaf: lv[0] || null };
+    };
+    // request = [name, rootIndex, ...child choices]: bisect that tree node (and its ancestors), then close.
+    function run(requests) {
+      const leaves = new Map(roots.map(t => [key(t), t]));
+      const frames = [], notes = [];
+      const bisect = (t, by) => {
+        leaves.delete(key(t)); for (const c of children(t)) leaves.set(key(c), c);
+        const L = [...leaves.values()];
+        frames.push({ cut: t, by, leaves: L, hang: hanging(L).points });
+      };
+      for (const [name, r0, ...choices] of requests) {
+        let t = roots[r0]; const path = [t];
+        for (const c of choices) { t = children(t)[c]; path.push(t); }
+        let did = false;
+        for (const p of path) if (leaves.has(key(p))) { bisect(p, name); did = true; }
+        if (!did) notes.push(`request ${name}: nothing left to cut, the closure for the other request already made it.`);
+        for (let h; (h = hanging([...leaves.values()]).leaf); ) bisect(h, 'closure');
+      }
+      frames.notes = notes;
+      return frames;
+    }
+    const A = ['A', 0, 1], B = ['B', 0, 0, 1];
+    const orders = [['A then B', run([A, B])], ['B then A', run([B, A])]];
+    const color = by => by === 'A' ? css('--c0') : by === 'B' ? css('--c2') : css('--muted');
+    const host = document.getElementById('order2d');
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const pt = v => [0.1 + v[0], 2.1 - v[1]];   // y up
+    const render = () => {
+      host.replaceChildren();
+      for (const [title, frames] of orders) {
+        const row = document.createElement('div'); row.className = 'order-row';
+        row.innerHTML = `<h3>${title}</h3>`;
+        const grid = document.createElement('div'); grid.className = 'frames';
+        frames.forEach((f, i) => {
+          const cell = document.createElement('div');
+          cell.className = 'frame' + (i === frames.length - 1 ? ' final' : '');
+          const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('viewBox', '0 0 2.2 2.2');
+          const poly = (t, fill, op) => {
+            const p = document.createElementNS(svgNS, 'polygon');
+            p.setAttribute('points', t.v.map(v => pt(v).join(',')).join(' '));
+            p.setAttribute('fill', fill); p.setAttribute('fill-opacity', op);
+            p.setAttribute('stroke', css('--fg')); p.setAttribute('stroke-width', '0.015');
+            p.setAttribute('stroke-linejoin', 'round'); svg.appendChild(p);
+          };
+          for (const t of f.leaves) poly(t, 'none', 0);
+          poly(f.cut, color(f.by), 0.55);
+          for (const m of f.hang) {
+            const c = document.createElementNS(svgNS, 'circle');
+            const [x, y] = pt(m); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', '0.055');
+            c.setAttribute('fill', '#e03131'); svg.appendChild(c);
+          }
+          const cap = document.createElement('div');
+          cap.textContent = `${i + 1} · ${f.by === 'closure' ? 'closure' : 'request ' + f.by}` + (i === frames.length - 1 ? ' · final' : '');
+          cell.append(svg, cap); grid.appendChild(cell);
+        });
+        row.appendChild(grid);
+        for (const n of frames.notes) {
+          const p = document.createElement('div'); p.className = 'controls'; p.textContent = n; row.appendChild(p);
+        }
+        host.appendChild(row);
+      }
+      const fin = fr => new Set(fr[fr.length - 1].leaves.map(key));
+      const [s1, s2] = orders.map(([, fr]) => fin(fr));
+      const same = s1.size === s2.size && [...s1].every(k => s2.has(k));
+      document.getElementById('order2dverdict').textContent =
+        `Final meshes: ${s1.size} and ${s2.size} triangles, ${same ? 'identical' : 'different'} (checked live).`;
+    };
+    render();
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+    new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  })();
+})();
+</script>
+</body>
+</html>
